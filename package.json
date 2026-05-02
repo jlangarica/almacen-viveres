@@ -1,26 +1,13 @@
 {
-  "name": "clasp",
+  "name": "almacen-viveres",
   "version": "1.0.0",
-  "description": "<div align=\"center\">",
-  "main": "index.js",
+  "description": "Almacén de Víveres - Hospital Civil de Guadalajara",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "rm -rf dist && npx tsc --outDir dist --rootDir src && find dist -type f -name '*.js' -exec sed -i '/^export {};/d' {} + && cp src/appsscript.json dist/ && cp -r src/ui dist/ui && find dist -type f -name '*.ts' -delete",
+    "push": "npm run build && clasp push -f"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/jlangarica/almacen-viveres.git"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "commonjs",
-  "bugs": {
-    "url": "https://github.com/jlangarica/almacen-viveres/issues"
-  },
-  "homepage": "https://github.com/jlangarica/almacen-viveres#readme",
   "devDependencies": {
-    "@google/clasp": "^3.3.0",
-    "@types/google-apps-script": "^2.0.8",
-    "typescript": "^5.9.3"
+    "@types/google-apps-script": "^1.0.83",
+    "typescript": "^5.0.0"
   }
 }
