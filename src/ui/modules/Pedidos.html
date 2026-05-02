@@ -32,10 +32,16 @@
           <h3>Pedido en Construcción</h3>
           <p class="text-sm text-gray">Lista de insumos a procesar</p>
         </div>
-        <button id="btnProcesar" class="btn btn-success" disabled>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: text-bottom; margin-right: 4px;"><polyline points="20 6 9 17 4 12"></polyline></svg>
-          Procesar Pedido
-        </button>
+        <div class="header-actions">
+          <button id="btnProcesar" class="btn btn-success" disabled>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: text-bottom; margin-right: 4px;"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            Procesar Cálculo
+          </button>
+          <button id="btnConfirmar" class="btn btn-primary" style="display: none; margin-left: 8px;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: text-bottom; margin-right: 4px;"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+            Confirmar y Enviar Pedido
+          </button>
+        </div>
       </div>
       
       <div class="table-container">
@@ -62,6 +68,10 @@
 </div>
 
 <style>
+  .header-actions {
+    display: flex;
+    align-items: center;
+  }
   .split-view-container {
     display: flex;
     gap: 20px;
@@ -190,6 +200,7 @@
   // Variables locales
   let solicitudes = [];
   let isProcessing = false;
+  let isCalculated = false;
   
   // Elementos DOM
   const insumoInput = document.getElementById('insumoInput');
@@ -197,6 +208,7 @@
   const cantidadInput = document.getElementById('cantidadInput');
   const btnAgregar = document.getElementById('btnAgregar');
   const btnProcesar = document.getElementById('btnProcesar');
+  const btnConfirmar = document.getElementById('btnConfirmar');
   const pedidoBody = document.getElementById('pedidoBody');
   const emptyRow = document.getElementById('emptyRow');
 
@@ -207,6 +219,7 @@
     // Event Listeners
     btnAgregar.addEventListener('click', handleAgregar);
     btnProcesar.addEventListener('click', handleProcesar);
+    btnConfirmar.addEventListener('click', handleConfirmar);
     
     // Permitir Enter para agregar
     cantidadInput.addEventListener('keypress', (e) => {
@@ -240,6 +253,10 @@
       return;
     }
     
+    // Resetear estado de cálculo si se agrega nuevo item
+    isCalculated = false;
+    btnConfirmar.style.display = 'none';
+
     // Intentar encontrar el código (el usuario puede haber escrito la descripción o el código)
     let codigo = rawValue;
     let descripcion = rawValue;
@@ -271,6 +288,8 @@
 
   function eliminarItem(index) {
     solicitudes.splice(index, 1);
+    isCalculated = false;
+    btnConfirmar.style.display = 'none';
     renderTable();
   }
 
@@ -279,6 +298,7 @@
       pedidoBody.innerHTML = '';
       pedidoBody.appendChild(emptyRow);
       btnProcesar.disabled = true;
+      btnConfirmar.style.display = 'none';
       return;
     }
     
@@ -319,7 +339,6 @@
   function handleProcesar() {
     if (solicitudes.length === 0) return;
     
-    // Extraer solo la data necesaria para el backend
     const dataToSend = solicitudes.map(s => ({
       codigo: s.codigo,
       cantidadSolicitada: s.cantidadSolicitada
@@ -329,14 +348,12 @@
     renderTable();
     btnProcesar.innerHTML = 'Procesando...';
     
-    // Llamada al backend
     google.script.run
       .withSuccessHandler(function(resultados) {
         isProcessing = false;
-        btnProcesar.innerHTML = 'Procesar Pedido';
+        isCalculated = true;
+        btnProcesar.innerHTML = 'Calcular de Nuevo';
         
-        // Actualizar la lista local con los resultados
-        // Mapeamos los resultados devueltos al array original o reconstruimos
         solicitudes = resultados.map(res => {
            return {
              ...res,
@@ -345,16 +362,58 @@
         });
         
         renderTable();
-        alert('Cálculo procesado exitosamente.');
+        // Mostrar botón de confirmación si no hay errores críticos
+        const hasErrors = solicitudes.some(s => s.error);
+        if (!hasErrors) {
+          btnConfirmar.style.display = 'inline-block';
+        }
       })
       .withFailureHandler(function(err) {
         isProcessing = false;
-        btnProcesar.innerHTML = 'Procesar Pedido';
+        btnProcesar.innerHTML = 'Procesar Cálculo';
         renderTable();
-        alert('Error al procesar: ' + err.message);
-        console.error(err);
+        alert('Error al calcular: ' + err.message);
       })
       .calculateOrderRequisition(dataToSend);
+  }
+
+  function handleConfirmar() {
+    if (!isCalculated || isProcessing) return;
+    
+    if (!confirm('¿Estás seguro de enviar este pedido? Esta acción registrará el folio en la base de datos.')) {
+      return;
+    }
+
+    isProcessing = true;
+    btnConfirmar.disabled = true;
+    btnConfirmar.innerHTML = 'Guardando...';
+    
+    google.script.run
+      .withSuccessHandler(function(folio) {
+        isProcessing = false;
+        alert('¡Pedido Guardado Exitosamente!\nFolio generado: ' + folio);
+        resetForm();
+      })
+      .withFailureHandler(function(err) {
+        isProcessing = false;
+        btnConfirmar.disabled = false;
+        btnConfirmar.innerHTML = 'Confirmar y Enviar Pedido';
+        alert('Error al guardar pedido: ' + err.message);
+      })
+      .savePedido(solicitudes);
+  }
+
+  function resetForm() {
+    solicitudes = [];
+    isCalculated = false;
+    isProcessing = false;
+    btnConfirmar.style.display = 'none';
+    btnConfirmar.disabled = false;
+    btnConfirmar.innerHTML = 'Confirmar y Enviar Pedido';
+    btnProcesar.innerHTML = 'Procesar Cálculo';
+    renderTable();
+    insumoInput.value = '';
+    cantidadInput.value = '';
   }
 
   // Exponer método para los botones de eliminar generados dinámicamente
