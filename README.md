@@ -15,7 +15,7 @@
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?style=flat-square&logo=typescript&logoColor=white)
 ![Clasp](https://img.shields.io/badge/Clasp-2.4+-00897B?style=flat-square&logo=google-cloud&logoColor=white)
 ![Google Sheets](https://img.shields.io/badge/Google%20Sheets-DB-34A853?style=flat-square&logo=google-sheets&logoColor=white)
-![License](https://img.shields.io/badge/Licencia-Instuticional-E91E63?style=flat-square)
+![License](https://img.shields.io/badge/Licencia-Institucional-E91E63?style=flat-square)
 ![Status](https://img.shields.io/badge/Estado-Activo-4CAF50?style=flat-square)
 
 <br>
@@ -24,7 +24,7 @@
 
 <br>
 
-<a href="#-visión-general">Visión General</a> · <a href="#-arquitectura">Arquitectura</a> · <a href="#-módulos">Módulos</a> · <a href="#-base-de-datos">Base de Datos</a> · <a href="#-seguridad">Seguridad</a> · <a href="#-despliegue">Despliegue</a> · <a href="#-roadmap">Roadmap</a>
+<a href="#visión-general">Visión General</a> · <a href="#arquitectura-del-sistema">Arquitectura</a> · <a href="#módulos-funcionales">Módulos</a> · <a href="#modelo-de-datos">Base de Datos</a> · <a href="#seguridad">Seguridad</a> · <a href="#despliegue">Despliegue</a> · <a href="#roadmap">Roadmap</a>
 
 </div>
 
@@ -37,24 +37,24 @@
 <details open>
 <summary><strong>Navegación Rápida</strong></summary>
 
-- [Visión General](#-visión-general)
-- [Stack Tecnológico](#-stack-tecnológico)
-- [Arquitectura del Sistema](#-arquitectura-del-sistema)
-- [Estructura del Repositorio](#-estructura-del-repositorio)
-- [Módulos Funcionales](#-módulos-funcionales)
-- [Modelo de Datos](#-modelo-de-datos)
-- [Flujo de Pedidos](#-flujo-de-pedidos)
-- [Rendimiento y Optimización](#-rendimiento-y-optimización)
-- [Seguridad](#-seguridad)
-- [Requisitos Previos](#-requisitos-previos)
-- [Instalación y Configuración](#-instalación-y-configuración)
-- [Despliegue](#-despliegue)
-- [Referencia de Comandos](#-referencia-de-comandos)
-- [API del Servidor](#-api-del-servidor)
-- [Roadmap](#-roadmap)
-- [Contribución](#-contribución)
-- [Solución de Problemas](#-solución-de-problemas)
-- [Licencia](#-licencia)
+- [Visión General](#visión-general)
+- [Stack Tecnológico](#stack-tecnológico)
+- [Arquitectura del Sistema](#arquitectura-del-sistema)
+- [Estructura del Repositorio](#estructura-del-repositorio)
+- [Módulos Funcionales](#módulos-funcionales)
+- [Modelo de Datos](#modelo-de-datos)
+- [Flujo de Pedidos](#flujo-de-pedidos)
+- [Rendimiento y Optimización](#rendimiento-y-optimización)
+- [Seguridad](#seguridad)
+- [Requisitos Previos](#requisitos-previos)
+- [Instalación y Configuración](#instalación-y-configuración)
+- [Despliegue](#despliegue)
+- [Referencia de Comandos](#referencia-de-comandos)
+- [API del Servidor](#api-del-servidor)
+- [Roadmap](#roadmap)
+- [Contribución](#contribución)
+- [Solución de Problemas](#solución-de-problemas)
+- [Licencia](#licencia)
 
 </details>
 
@@ -1173,7 +1173,7 @@ Para consultas sobre uso, acceso o modificación, contactar al área de sistemas
 
 ### 🏥 Hospital Civil de Guadalajara
 
-**Organismo Público Descentraliado**
+**Organismo Público Descentralizado**
 
 *Sistema desarrollado con estándares de ingeniería de software de nivel empresarial.*
 
