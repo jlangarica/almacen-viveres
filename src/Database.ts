@@ -34,9 +34,15 @@ interface Adjudicado {
 /** Artículo individual dentro del payload de un pedido entrante. */
 interface PedidoArticulo {
   codigo: string;
+  id_contrato: string;
   descripcion: string;
   cantidadSolicitada: number;
   unidadesComerciales: number;
+  costoEstimado?: number;
+}
+
+interface PedidoData {
+  lineas: PedidoArticulo[];
 }
 
 // ─── Funciones de Caché Segmentado ──────────────────────────────────────────────
@@ -223,5 +229,81 @@ function savePedido(articulos: PedidoArticulo[]): string {
     throw new Error("Error crítico al guardar pedido: " + (err as Error).message);
   } finally {
     lock.releaseLock();
+  }
+}
+
+/**
+ * Guarda el pedido y actualiza el consumo en la BD usando la llave [codigo + id_contrato]
+ * @param pedidoData - Contiene array de lineas aprobadas
+ */
+function savePedidoAndUpdateStock(pedidoData: PedidoData): { exito: boolean; folio: string } {
+  if (!isAuthorized()) throw new Error("Unauthorized");
+  
+  const lock = LockService.getScriptLock();
+  if (!lock.tryLock(15000)) throw new Error("Sistema ocupado, intenta en 15 seg.");
+
+  try {
+    const ss = SpreadsheetApp.openById(DB_ALMV_ID);
+    const sheetAdjudicados = ss.getSheetByName('Adjudicados');
+    
+    if (!sheetAdjudicados) throw new Error("Hoja Adjudicados no encontrada.");
+
+    // 1. Leer toda la base de datos en memoria (Patrón Batch)
+    const data = sheetAdjudicados.getDataRange().getValues();
+    let stockActualizado = false;
+
+    // 2. Procesar cada línea del pedido contra la matriz en memoria
+    pedidoData.lineas.forEach(linea => {
+      // Buscar la fila exacta por Código (Índice 3) y Contrato (Índice 1)
+      const rowIndex = data.findIndex(row => row[3] == linea.codigo && row[1] == linea.id_contrato);
+      
+      if (rowIndex !== -1) {
+        // Actualizar cantidad_consumida (Columna R, Índice 17)
+        const consumoAnterior = Number(data[rowIndex][17] || 0);
+        data[rowIndex][17] = consumoAnterior + linea.unidadesComerciales;
+        stockActualizado = true;
+      } else {
+        throw new Error(`Inconsistencia: No se encontró el cruce de Código ${linea.codigo} y Contrato ${linea.id_contrato}`);
+      }
+    });
+
+    // 3. Escribir los cambios de stock de una sola vez
+    if (stockActualizado) {
+      sheetAdjudicados.getRange(1, 1, data.length, data[0].length).setValues(data);
+    }
+
+    // 4. Guardar el registro del pedido en la hoja 'Pedidos' (Crear hoja si no existe)
+    let sheetPedidos = ss.getSheetByName('Pedidos');
+    if (!sheetPedidos) {
+      sheetPedidos = ss.insertSheet('Pedidos');
+    }
+    
+    if (sheetPedidos.getLastRow() === 0) {
+      sheetPedidos.appendRow(['Folio', 'Fecha', 'Usuario', 'Codigo', 'Contrato', 'Unidades', 'Costo']);
+      sheetPedidos.getRange(1, 1, 1, 7).setFontWeight('bold').setBackground('#efefef');
+      sheetPedidos.setFrozenRows(1);
+    }
+    
+    const props = PropertiesService.getScriptProperties();
+    const currentIdStr = props.getProperty('LAST_PEDIDO_ID') || '0';
+    const nextId = parseInt(currentIdStr, 10) + 1;
+    const folio = 'PED-' + nextId.toString().padStart(3, '0');
+    props.setProperty('LAST_PEDIDO_ID', nextId.toString());
+    
+    const usuario = Session.getActiveUser().getEmail();
+    const fecha = new Date();
+
+    const filasPedido: unknown[][] = pedidoData.lineas.map(l => [
+      folio, fecha, usuario, 
+      l.codigo, l.id_contrato, l.unidadesComerciales, l.costoEstimado || 0
+    ]);
+    
+    sheetPedidos.getRange(sheetPedidos.getLastRow() + 1, 1, filasPedido.length, 7).setValues(filasPedido);
+
+    return { exito: true, folio: folio };
+
+  } finally {
+    lock.releaseLock();
+    CacheService.getScriptCache().remove(CATALOG_CACHE_KEY); // Invalidar caché
   }
 }
