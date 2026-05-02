@@ -2,6 +2,7 @@
   "compilerOptions": {
     "lib": ["esnext"],
     "target": "ESNext",
+    "module": "None",
     "noEmit": false,
     "strict": false,
     "skipLibCheck": true,
