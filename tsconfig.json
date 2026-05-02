@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "lib": ["esnext"],
+    "target": "ESNext",
+    "noEmit": false,
+    "strict": false,
+    "skipLibCheck": true,
+    "types": ["google-apps-script"],
+    "typeRoots": ["./node_modules/@types"],
+    "outDir": "./dist",
+    "rootDir": "./src"
+  },
+  "include": ["src/**/*.ts"]
+}
