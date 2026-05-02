@@ -1,163 +1,607 @@
-<div class="view-header">
-  <div class="view-title">
-    <h2>Contratos</h2>
-    <p>Gestión y seguimiento de vigencias</p>
-  </div>
-  <div class="view-actions">
-    <div class="search-box">
-      <svg class="search-icon" viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-      <input type="text" id="search-contratos" placeholder="Buscar por licitación o proveedor..." />
-    </div>
-  </div>
-</div>
-
-<div class="view-content">
-  <div class="data-grid-container" style="background: var(--surface); border-radius: var(--radius-lg); border: 1px solid var(--border); overflow: hidden;">
-    <div class="table-responsive" style="overflow-x: auto;">
-      <table class="data-grid">
-        <thead>
-          <tr>
-            <th>Licitación</th>
-            <th>Proveedor</th>
-            <th>Denominación</th>
-            <th>Vigencia (Inicio - Fin)</th>
-            <th>Estatus</th>
-          </tr>
-        </thead>
-        <tbody id="contratos-tbody">
-          <!-- Skeleton Loader -->
-          <tr>
-            <td colspan="5" class="text-center" style="padding: 40px;">
-              <div class="spinner" style="margin: 0 auto; width: 32px; height: 32px; border: 3px solid var(--border); border-top-color: var(--primary); border-radius: 50%; animation: spin 1s linear infinite;"></div>
-              <p style="margin-top: 16px; color: var(--text-secondary);">Cargando contratos...</p>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-</div>
-
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-.badge {
-  display: inline-flex;
-  align-items: center;
-  padding: 4px 8px;
-  border-radius: 12px;
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.5px;
-}
-.badge-vigente {
-  background-color: rgba(16, 185, 129, 0.1);
-  color: var(--secondary-mod, #10b981);
-}
-.badge-vencido {
-  background-color: rgba(239, 68, 68, 0.1);
-  color: var(--danger-mod, #ef4444);
-}
-.ampliacion-indicator {
-  font-size: 10px;
-  background: var(--primary-light, #e0e7ff);
-  color: var(--primary, #4f46e5);
-  padding: 2px 4px;
-  border-radius: 4px;
-  margin-left: 8px;
-  vertical-align: middle;
-}
-.data-grid {
-  width: 100%;
-  border-collapse: collapse;
-}
-.data-grid th, .data-grid td {
-  padding: 16px;
-  text-align: left;
-  border-bottom: 1px solid var(--border);
-}
-.data-grid th {
-  background-color: var(--surface-hover);
-  font-weight: 600;
-  color: var(--text-secondary);
-  font-size: 13px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-.data-grid tbody tr:hover {
-  background-color: rgba(0,0,0,0.02);
-}
+  /* ═══════════════════════════════════════════
+     DESIGN TOKENS (Sincronizados con el ecosistema)
+     ═══════════════════════════════════════════ */
+  :root {
+    --bg: #FFFFFF;
+    --bg-elevated: #F8F9FB;
+    --bg-hover: #F4F5F8;
+    --bg-active: #ECEEF3;
+    --fg: #1A1D26;
+    --fg-secondary: #5F6578;
+    --fg-tertiary: #9198AB;
+    --border: #E2E5EC;
+    --border-light: #EEF0F4;
+    --primary: #0D6E3F;
+    --primary-light: #E6F4EC;
+    --primary-lighter: #F0FAF4;
+    --primary-dark: #095C33;
+    --secondary: #1A6B5A;
+    --secondary-light: #E4F3EF;
+    --accent: #C2530D;
+    --accent-light: #FEF0E6;
+    --danger: #B91C1C;
+    --danger-light: #FEF2F2;
+    --indigo: #4338CA;
+    --indigo-light: #EEF2FF;
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+    --radius-xl: 20px;
+    --shadow-xs: 0 1px 2px rgba(0,0,0,0.04);
+    --shadow-sm: 0 2px 8px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.02);
+    --shadow-md: 0 4px 16px rgba(0,0,0,0.06), 0 1px 4px rgba(0,0,0,0.02);
+    --shadow-lg: 0 12px 40px rgba(0,0,0,0.08), 0 4px 12px rgba(0,0,0,0.03);
+    --transition-fast: 150ms cubic-bezier(0.2, 0, 0, 1);
+    --transition-base: 250ms cubic-bezier(0.2, 0, 0, 1);
+    --transition-slow: 400ms cubic-bezier(0.2, 0, 0, 1);
+  }
+
+  .view-container * {
+    box-sizing: border-box;
+  }
+
+  .view-container {
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    color: var(--fg);
+    font-size: 14px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 32px;
+    animation: pageIn 600ms cubic-bezier(0.2, 0, 0, 1) both;
+  }
+
+  @keyframes pageIn {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ═══════════════════════════════════════════
+     HEADER
+     ═══════════════════════════════════════════ */
+  .header-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+  }
+
+  .header-title h2 {
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--fg);
+    letter-spacing: -0.3px;
+    margin: 0;
+  }
+
+  .header-title p {
+    font-size: 13px;
+    color: var(--fg-tertiary);
+    margin: 2px 0 0 0;
+  }
+
+  .search-wrapper {
+    position: relative;
+    width: 320px;
+  }
+
+  .search-wrapper .search-icon {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--fg-tertiary);
+    transition: color var(--transition-fast);
+    pointer-events: none;
+    display: flex;
+  }
+
+  .search-input {
+    width: 100%;
+    padding: 11px 36px 11px 42px;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-md);
+    font-size: 14px;
+    font-family: inherit;
+    background: var(--bg);
+    color: var(--fg);
+    transition: all var(--transition-base);
+    outline: none;
+  }
+
+  .search-input::placeholder { color: var(--fg-tertiary); }
+  .search-input:hover { border-color: #C8CCD6; }
+  .search-input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(13,110,63,0.1); }
+  .search-input:focus ~ .search-icon { color: var(--primary); }
+
+  .search-clear {
+    position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+    width: 24px; height: 24px; border: none; background: var(--bg-active);
+    border-radius: 50%; cursor: pointer; display: none; align-items: center;
+    justify-content: center; color: var(--fg-secondary); font-size: 14px;
+    transition: all var(--transition-fast);
+  }
+  .search-clear:hover { background: var(--border); color: var(--fg); }
+  .search-clear.visible { display: flex; }
+
+  /* ═══════════════════════════════════════════
+     STATUS FILTER (PILLS)
+     ═══════════════════════════════════════════ */
+  .filter-bar {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+  }
+
+  .filter-pills {
+    display: flex;
+    gap: 6px;
+    background: var(--bg-elevated);
+    padding: 4px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-light);
+  }
+
+  .pill {
+    padding: 6px 14px;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    font-weight: 600;
+    font-family: inherit;
+    background: transparent;
+    color: var(--fg-secondary);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    outline: none;
+  }
+
+  .pill:hover { color: var(--fg); background: var(--bg-hover); }
+
+  .pill.active {
+    background: var(--bg);
+    color: var(--fg);
+    box-shadow: var(--shadow-xs), 0 1px 3px rgba(0,0,0,0.04);
+  }
+
+  .pill:focus-visible { outline: 2px solid var(--primary); outline-offset: -2px; }
+
+  .stat-chip {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 5px 12px; background: var(--bg-elevated); border: 1px solid var(--border-light);
+    border-radius: 100px; font-size: 12px; font-weight: 500; color: var(--fg-secondary);
+  }
+  .stat-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+  .stat-value { font-weight: 700; color: var(--fg); font-family: 'JetBrains Mono', monospace; font-size: 11px; }
+
+  /* ═══════════════════════════════════════════
+     DATA GRID
+     ═══════════════════════════════════════════ */
+  .grid-wrapper {
+    background: var(--bg); border: 1px solid var(--border);
+    border-radius: var(--radius-lg); overflow: hidden;
+    box-shadow: var(--shadow-sm); transition: box-shadow var(--transition-base);
+  }
+  .grid-wrapper:hover { box-shadow: var(--shadow-md); }
+
+  .data-table { width: 100%; border-collapse: collapse; text-align: left; font-size: 14px; }
+  .data-table thead { position: sticky; top: 0; z-index: 5; }
+  .data-table thead tr { background: var(--bg-elevated); border-bottom: 1.5px solid var(--border); margin: 0; }
+
+  .data-table th {
+    padding: 14px 18px; font-size: 11px; font-weight: 700; color: var(--fg-tertiary);
+    text-transform: uppercase; letter-spacing: 0.8px; white-space: nowrap; user-select: none;
+  }
+
+  .data-table th.sortable { cursor: pointer; transition: color var(--transition-fast); }
+  .data-table th.sortable:hover { color: var(--fg-secondary); }
+  .data-table th .sort-icon { display: inline-flex; margin-left: 4px; opacity: 0; transition: opacity var(--transition-fast); vertical-align: middle; }
+  .data-table th.sortable:hover .sort-icon, .data-table th.sorted .sort-icon { opacity: 1; }
+  .data-table th.sorted { color: var(--primary); }
+
+  .data-table tbody tr {
+    border-bottom: 1px solid var(--border-light);
+    transition: all var(--transition-fast);
+    animation: rowIn 350ms cubic-bezier(0.2, 0, 0, 1) both;
+  }
+  .data-table tbody tr:last-child { border-bottom: none; }
+  .data-table tbody tr:hover { background: var(--bg-hover); }
+  .data-table td { padding: 16px 18px; vertical-align: middle; }
+
+  @keyframes rowIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Cell Styles */
+  .cell-code {
+    font-family: 'JetBrains Mono', monospace; font-weight: 600; font-size: 13px;
+    color: var(--primary); background: var(--primary-lighter); padding: 3px 8px;
+    border-radius: 6px; display: inline-block; letter-spacing: 0.2px;
+  }
+
+  .cell-desc { font-weight: 500; color: var(--fg); max-width: 280px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }
+  .cell-provider { color: var(--fg-secondary); font-weight: 500; }
+
+  /* Date & Timeline */
+  .vigencia-cell { min-width: 220px; }
+  .vigencia-dates { font-size: 13px; color: var(--fg-secondary); font-weight: 500; display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+  .vigencia-arrow { color: var(--fg-tertiary); }
+  .vigencia-track { width: 100%; height: 4px; background: var(--bg-active); border-radius: 100px; overflow: hidden; }
+  .vigencia-bar { height: 100%; border-radius: 100px; transition: width 600ms cubic-bezier(0.2, 0, 0, 1); }
+  .vigencia-bar.vigente { background: var(--primary); }
+  .vigencia-bar.vencido { background: var(--danger); }
+  .vigencia-bar.proximo { background: var(--accent); }
+  
+  /* Ampliación Chip */
+  .amp-chip {
+    display: inline-flex; align-items: center; gap: 4px; font-size: 10px; font-weight: 700;
+    color: var(--indigo); background: var(--indigo-light); padding: 2px 6px;
+    border-radius: 4px; margin-left: 8px; text-transform: uppercase; letter-spacing: 0.5px;
+    vertical-align: middle;
+  }
+
+  /* Badges */
+  .badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 5px 12px; border-radius: 100px; font-size: 11px;
+    font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase;
+  }
+  .badge-dot { width: 6px; height: 6px; border-radius: 50%; }
+  .badge-vigente { background: var(--primary-lighter); color: var(--primary); }
+  .badge-vigente .badge-dot { background: var(--primary); box-shadow: 0 0 0 2px rgba(13,110,63,0.2); animation: pulse 2s infinite; }
+  .badge-vencido { background: var(--danger-light); color: var(--danger); }
+  .badge-vencido .badge-dot { background: var(--danger); }
+
+  @keyframes pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(13,110,63,0.3); }
+    50% { box-shadow: 0 0 0 4px rgba(13,110,63,0); }
+  }
+
+  /* ═══════════════════════════════════════════
+     SKELETON & STATES
+     ═══════════════════════════════════════════ */
+  .skeleton-row { animation: rowIn 350ms cubic-bezier(0.2, 0, 0, 1) both; }
+  .skeleton-cell {
+    height: 14px; border-radius: 6px;
+    background: linear-gradient(90deg, var(--bg-elevated) 25%, #ECEEF3 50%, var(--bg-elevated) 75%);
+    background-size: 200% 100%; animation: shimmer 1.8s ease-in-out infinite;
+  }
+  @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+  .state-container { padding: 64px 32px; text-align: center; }
+  .state-icon { width: 64px; height: 64px; margin: 0 auto 16px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+  .state-icon.empty { background: var(--bg-elevated); color: var(--fg-tertiary); }
+  .state-icon.error { background: var(--danger-light); color: var(--danger); }
+  .state-title { font-size: 16px; font-weight: 700; color: var(--fg); margin-bottom: 6px; }
+  .state-desc { font-size: 13px; color: var(--fg-tertiary); max-width: 320px; margin: 0 auto 20px; }
+
+  /* ═══════════════════════════════════════════
+     RESPONSIVE & A11Y
+     ═══════════════════════════════════════════ */
+  .view-container ::-webkit-scrollbar { width: 6px; height: 6px; }
+  .view-container ::-webkit-scrollbar-track { background: transparent; }
+  .view-container ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 100px; }
+
+  .view-container :focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+  .view-container button:focus:not(:focus-visible), .view-container input:focus:not(:focus-visible) { outline: none; }
+
+  @media (max-width: 768px) {
+    .view-container { padding: 16px; }
+    .header-bar { flex-direction: column; align-items: stretch; }
+    .search-wrapper { width: 100%; }
+    .data-table th, .data-table td { padding: 12px; }
+    .cell-desc { max-width: 180px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+  }
 </style>
 
-<script>
-(function() {
-  let contratosData = [];
+<div class="view-container">
+  <!-- HEADER -->
+  <header class="header-bar">
+    <div class="header-title">
+      <h2>Contratos</h2>
+      <p>Gestión y seguimiento de vigencias</p>
+    </div>
+    <div class="search-wrapper">
+      <span class="search-icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      </span>
+      <input type="text" id="search-contratos" class="search-input" placeholder="Buscar por licitación, proveedor..." aria-label="Buscar contratos">
+      <button class="search-clear" id="search-clear" aria-label="Limpiar búsqueda">&times;</button>
+    </div>
+  </header>
 
-  function loadContratos() {
-    google.script.run
-      .withSuccessHandler(function(response) {
-        contratosData = response;
-        renderContratos(contratosData);
-      })
-      .withFailureHandler(function(error) {
-        console.error("Error al cargar contratos:", error);
-        document.getElementById('contratos-tbody').innerHTML = `
-          <tr>
-            <td colspan="5" class="text-center" style="padding: 40px; color: var(--danger-mod, #ef4444);">
-              Error al cargar los datos. Por favor, intente nuevamente.
-            </td>
-          </tr>
-        `;
-      })
-      .getContratosList();
-  }
+  <!-- FILTER BAR -->
+  <div class="filter-bar">
+    <div class="filter-pills" id="status-pills">
+      <button class="pill active" data-status="TODOS">Todos</button>
+      <button class="pill" data-status="VIGENTE">Vigentes</button>
+      <button class="pill" data-status="VENCIDO">Vencidos</button>
+    </div>
+    <div style="display:flex; gap:8px; flex-wrap:wrap;" id="stats-area"></div>
+  </div>
 
-  function renderContratos(data) {
-    const tbody = document.getElementById('contratos-tbody');
-    
-    if (!data || data.length === 0) {
-      tbody.innerHTML = `
+  <!-- DATA GRID -->
+  <div class="grid-wrapper">
+    <table class="data-table" role="grid">
+      <thead>
         <tr>
-          <td colspan="5" class="text-center" style="padding: 40px; color: var(--text-secondary);">
-            No se encontraron contratos.
-          </td>
+          <th class="sortable" data-sort="licitacion">Licitación <span class="sort-icon"><svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M12 5l7 7H5z"/></svg></span></th>
+          <th class="sortable" data-sort="proveedor">Proveedor <span class="sort-icon"><svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M12 5l7 7H5z"/></svg></span></th>
+          <th>Denominación</th>
+          <th>Vigencia</th>
+          <th class="sortable sorted" data-sort="estatus">Estatus <span class="sort-icon"><svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M12 5l7 7H5z"/></svg></span></th>
         </tr>
-      `;
-      return;
+      </thead>
+      <tbody id="contratos-tbody"></tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+  /* ═══════════════════════════════════════════
+     STATE & DOM
+     ═══════════════════════════════════════════ */
+  (function() {
+    let contratosData = [];
+    let currentSort = { key: 'estatus', dir: 'asc' };
+    let currentStatusFilter = 'TODOS';
+    let debounceTimer = null;
+
+    const $body = document.getElementById('contratos-tbody');
+    const $search = document.getElementById('search-contratos');
+    const $searchClear = document.getElementById('search-clear');
+    const $pills = document.getElementById('status-pills');
+    const $stats = document.getElementById('stats-area');
+
+    /* ═══════════════════════════════════════════
+       INIT
+       ═══════════════════════════════════════════ */
+    function init() {
+      renderSkeleton();
+      google.script.run
+        .withSuccessHandler(renderCatalog)
+        .withFailureHandler(handleError)
+        .getContratosList();
     }
 
-    tbody.innerHTML = data.map(c => {
-      const badgeClass = c.estatus === 'VIGENTE' ? 'badge-vigente' : 'badge-vencido';
-      const ampliacionHtml = c.tiene_ampliacion ? `<span class="ampliacion-indicator" title="Tiene ampliación">+AMP</span>` : '';
-      
-      return `
-        <tr>
-          <td><strong>${c.licitacion}</strong></td>
-          <td>${c.proveedor}</td>
-          <td>${c.denominacion}</td>
-          <td>${c.fecha_inicio} a ${c.fecha_fin} ${ampliacionHtml}</td>
-          <td><span class="badge ${badgeClass}">${c.estatus}</span></td>
-        </tr>
-      `;
-    }).join('');
-  }
+    /* ═══════════════════════════════════════════
+       SKELETON
+       ═══════════════════════════════════════════ */
+    function renderSkeleton() {
+      let html = '';
+      for (let i = 0; i < 6; i++) {
+        html += \`<tr class="skeleton-row" style="animation-delay:\${i * 70}ms">
+          <td style="padding:16px 18px"><div class="skeleton-cell" style="width:80px"></div></td>
+          <td style="padding:16px 18px"><div class="skeleton-cell" style="width:140px"></div></td>
+          <td style="padding:16px 18px"><div class="skeleton-cell" style="width:200px"></div></td>
+          <td style="padding:16px 18px"><div class="skeleton-cell" style="width:180px"></div></td>
+          <td style="padding:16px 18px"><div class="skeleton-cell" style="width:70px;margin:0 auto"></div></td>
+        </tr>\`;
+      }
+      $body.innerHTML = html;
+    }
 
-  // Filtrado
-  const searchInput = document.getElementById('search-contratos');
-  if (searchInput) {
-    searchInput.addEventListener('input', function(e) {
-      const term = e.target.value.toLowerCase();
-      const filtered = contratosData.filter(c => 
-        c.licitacion.toLowerCase().includes(term) || 
-        c.proveedor.toLowerCase().includes(term) ||
-        c.denominacion.toLowerCase().includes(term)
-      );
-      renderContratos(filtered);
+    /* ═══════════════════════════════════════════
+       ERROR
+       ═══════════════════════════════════════════ */
+    function handleError(err) {
+      $body.innerHTML = \`<tr><td colspan="5"><div class="state-container">
+        <div class="state-icon error"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>
+        <div class="state-title">Error al cargar datos</div>
+        <div class="state-desc">\${escapeHTML(err.message)}</div>
+      </div></td></tr>\`;
+    }
+
+    /* ═══════════════════════════════════════════
+       RENDER CATALOG (Data Handler)
+       ═══════════════════════════════════════════ */
+    function renderCatalog(data) {
+      if (!data || !data.length) {
+        $body.innerHTML = \`<tr><td colspan="5"><div class="state-container">
+          <div class="state-icon empty"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+          <div class="state-title">Sin contratos</div>
+          <div class="state-desc">No se encontraron contratos registrados en el sistema.</div>
+        </div></td></tr>\`;
+        return;
+      }
+
+      contratosData = data;
+      updateStats(data);
+      applyFiltersAndSort();
+    }
+
+    /* ═══════════════════════════════════════════
+       STATS
+       ═══════════════════════════════════════════ */
+    function updateStats(data) {
+      const total = data.length;
+      const vigentes = data.filter(c => c.estatus === 'VIGENTE').length;
+      const vencidos = data.filter(c => c.estatus === 'VENCIDO').length;
+      const ampiados = data.filter(c => c.tiene_ampliacion).length;
+
+      $stats.innerHTML = \`
+        <div class="stat-chip"><span class="stat-dot" style="background:var(--primary)"></span>Vigentes <span class="stat-value">\${vigentes}</span></div>
+        <div class="stat-chip"><span class="stat-dot" style="background:var(--danger)"></span>Vencidos <span class="stat-value">\${vencidos}</span></div>
+        \${ampiados > 0 ? \`<div class="stat-chip"><span class="stat-dot" style="background:var(--indigo)"></span>Ampliados <span class="stat-value">\${ampiados}</span></div>\` : ''}
+      \`;
+    }
+
+    /* ═══════════════════════════════════════════
+       RENDER ROWS
+       ═══════════════════════════════════════════ */
+    function renderRows(rows) {
+      if (!rows.length) {
+        $body.innerHTML = \`<tr><td colspan="5"><div class="state-container">
+          <div class="state-icon empty"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>
+          <div class="state-title">Sin resultados</div>
+          <div class="state-desc">Intenta con otros términos de búsqueda o cambia el filtro de estatus.</div>
+        </div></td></tr>\`;
+        return;
+      }
+
+      $body.innerHTML = rows.map((c, idx) => {
+        const delay = Math.min(idx * 35, 500);
+        const isVigente = c.estatus === 'VIGENTE';
+        const badgeClass = isVigente ? 'badge-vigente' : 'badge-vencido';
+        const ampHtml = c.tiene_ampliacion ? \`<span class="amp-chip">+ Amp</span>\` : '';
+        
+        // Cálculo de progreso de vigencia
+        const progress = calcVigenciaProgress(c.fecha_inicio, c.fecha_fin, isVigente);
+        const barClass = !isVigente ? 'vencido' : (progress > 80 ? 'proximo' : 'vigente');
+
+        return \`<tr style="animation-delay:\${delay}ms">
+          <td><span class="cell-code">\${escapeHTML(c.licitacion)}</span></td>
+          <td><span class="cell-provider">\${escapeHTML(c.proveedor)}</span></td>
+          <td><span class="cell-desc" title="\${escapeHTML(c.denominacion)}">\${escapeHTML(c.denominacion)}</span></td>
+          <td>
+            <div class="vigencia-cell">
+              <div class="vigencia-dates">
+                \${escapeHTML(c.fecha_inicio)} 
+                <svg class="vigencia-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                \${escapeHTML(c.fecha_fin)} \${ampHtml}
+              </div>
+              <div class="vigencia-track">
+                <div class="vigencia-bar \${barClass}" style="width:\${progress}%"></div>
+              </div>
+            </div>
+          </td>
+          <td><span class="badge \${badgeClass}"><span class="badge-dot"></span>\${escapeHTML(c.estatus)}</span></td>
+        </tr>\`;
+      }).join('');
+    }
+
+    /* ═══════════════════════════════════════════
+       DATE HELPERS (Cálculo de progreso)
+       ═══════════════════════════════════════════ */
+    function parseDate(str) {
+      if (!str) return null;
+      // Intenta ISO (yyyy-MM-dd)
+      let d = new Date(str);
+      if (!isNaN(d)) return d;
+      // Intenta DD/MM/YYYY
+      const parts = str.split('/');
+      if (parts.length === 3) {
+        d = new Date(parts[2], parts[1] - 1, parts[0]);
+        if (!isNaN(d)) return d;
+      }
+      return null;
+    }
+
+    function calcVigenciaProgress(startStr, endStr, isVigente) {
+      const s = parseDate(startStr);
+      const e = parseDate(endStr);
+      if (!s || !e || e <= s) return isVigente ? 50 : 100;
+      const now = new Date();
+      if (now >= e) return 100;
+      if (now <= s) return 0;
+      return Math.round(((now - s) / (e - s)) * 100);
+    }
+
+    /* ═══════════════════════════════════════════
+       FILTER & SORT
+       ═══════════════════════════════════════════ */
+    function applyFiltersAndSort() {
+      const query = $search.value.toLowerCase().trim();
+      const { key, dir } = currentSort;
+
+      let filtered = contratosData.filter(c => {
+        const matchSearch = !query || 
+          String(c.licitacion || '').toLowerCase().includes(query) || 
+          String(c.proveedor || '').toLowerCase().includes(query) || 
+          String(c.denominacion || '').toLowerCase().includes(query);
+        const matchStatus = currentStatusFilter === 'TODOS' || c.estatus === currentStatusFilter;
+        return matchSearch && matchStatus;
+      });
+
+      filtered.sort((a, b) => {
+        let va = a[key], vb = b[key];
+        if (typeof va === 'string') { va = va.toLowerCase(); vb = String(vb || '').toLowerCase(); }
+        if (va < vb) return dir === 'asc' ? -1 : 1;
+        if (va > vb) return dir === 'asc' ? 1 : -1;
+        return 0;
+      });
+
+      renderRows(filtered);
+    }
+
+    /* ═══════════════════════════════════════════
+       EVENT LISTENERS
+       ═══════════════════════════════════════════ */
+    $search.addEventListener('input', () => {
+      $searchClear.classList.toggle('visible', $search.value.length > 0);
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(applyFiltersAndSort, 200);
     });
-  }
 
-  // Auto-ejecutar
-  loadContratos();
-})();
+    $searchClear.addEventListener('click', () => {
+      $search.value = '';
+      $searchClear.classList.remove('visible');
+      $search.focus();
+      applyFiltersAndSort();
+    });
+
+    // Status Pills
+    $pills.addEventListener('click', (e) => {
+      const pill = e.target.closest('.pill');
+      if (!pill) return;
+      $pills.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+      pill.classList.add('active');
+      currentStatusFilter = pill.dataset.status;
+      applyFiltersAndSort();
+    });
+
+    // Sort Headers
+    document.querySelectorAll('.data-table th.sortable').forEach(th => {
+      th.addEventListener('click', () => {
+        const key = th.dataset.sort;
+        if (currentSort.key === key) {
+          currentSort.dir = currentSort.dir === 'asc' ? 'desc' : 'asc';
+        } else {
+          currentSort = { key, dir: 'asc' };
+        }
+        document.querySelectorAll('.data-table th').forEach(h => h.classList.remove('sorted'));
+        th.classList.add('sorted');
+        const icon = th.querySelector('.sort-icon svg');
+        if (icon) {
+          icon.innerHTML = currentSort.dir === 'asc'
+            ? '<path d="M12 19l-7-7h14z"/>'
+            : '<path d="M12 5l7 7H5z"/>';
+        }
+        applyFiltersAndSort();
+      });
+    });
+
+    // Keyboard shortcut Ctrl+K
+    document.addEventListener('keydown', (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+        e.preventDefault();
+        $search.focus();
+        $search.select();
+      }
+    });
+
+    /* ═══════════════════════════════════════════
+       HELPERS
+       ═══════════════════════════════════════════ */
+    function escapeHTML(str) {
+      const div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
+    }
+
+    // Initialize module
+    init();
+  })();
 </script>
