@@ -20,6 +20,6 @@
   "homepage": "https://github.com/jlangarica/almacen-viveres#readme",
   "devDependencies": {
     "@types/google-apps-script": "^2.0.8",
-    "typescript": "^6.0.3"
+    "typescript": "^5.9.3"
   }
 }
