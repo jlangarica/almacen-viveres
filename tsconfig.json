@@ -2,13 +2,11 @@
   "compilerOptions": {
     "lib": ["esnext"],
     "target": "ESNext",
-    "module": "None",
     "noEmit": true,
     "strict": true,
     "skipLibCheck": true,
     "isolatedModules": true,
-    "moduleDetection": "force",
-    "experimentalDecorators": true
+    "moduleDetection": "force"
   },
   "include": ["src/**/*.ts"]
 }
