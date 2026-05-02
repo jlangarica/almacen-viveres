@@ -1,8 +1,163 @@
-<div class="view-container">
-  <div style="text-align: center; padding: 60px; color: #5f6368;">
-    <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin-bottom: 24px; opacity: 0.5;"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
-    <h2>Módulo en Desarrollo</h2>
-    <p>Estamos trabajando para traerte esta funcionalidad muy pronto.</p>
-    <button class="btn btn-primary" style="width: auto; margin-top: 24px;" onclick="loadModule('Dashboard')">Volver al Dashboard</button>
+<div class="view-header">
+  <div class="view-title">
+    <h2>Contratos</h2>
+    <p>Gestión y seguimiento de vigencias</p>
+  </div>
+  <div class="view-actions">
+    <div class="search-box">
+      <svg class="search-icon" viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+      <input type="text" id="search-contratos" placeholder="Buscar por licitación o proveedor..." />
+    </div>
   </div>
 </div>
+
+<div class="view-content">
+  <div class="data-grid-container" style="background: var(--surface); border-radius: var(--radius-lg); border: 1px solid var(--border); overflow: hidden;">
+    <div class="table-responsive" style="overflow-x: auto;">
+      <table class="data-grid">
+        <thead>
+          <tr>
+            <th>Licitación</th>
+            <th>Proveedor</th>
+            <th>Denominación</th>
+            <th>Vigencia (Inicio - Fin)</th>
+            <th>Estatus</th>
+          </tr>
+        </thead>
+        <tbody id="contratos-tbody">
+          <!-- Skeleton Loader -->
+          <tr>
+            <td colspan="5" class="text-center" style="padding: 40px;">
+              <div class="spinner" style="margin: 0 auto; width: 32px; height: 32px; border: 3px solid var(--border); border-top-color: var(--primary); border-radius: 50%; animation: spin 1s linear infinite;"></div>
+              <p style="margin-top: 16px; color: var(--text-secondary);">Cargando contratos...</p>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<style>
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+.badge-vigente {
+  background-color: rgba(16, 185, 129, 0.1);
+  color: var(--secondary-mod, #10b981);
+}
+.badge-vencido {
+  background-color: rgba(239, 68, 68, 0.1);
+  color: var(--danger-mod, #ef4444);
+}
+.ampliacion-indicator {
+  font-size: 10px;
+  background: var(--primary-light, #e0e7ff);
+  color: var(--primary, #4f46e5);
+  padding: 2px 4px;
+  border-radius: 4px;
+  margin-left: 8px;
+  vertical-align: middle;
+}
+.data-grid {
+  width: 100%;
+  border-collapse: collapse;
+}
+.data-grid th, .data-grid td {
+  padding: 16px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+.data-grid th {
+  background-color: var(--surface-hover);
+  font-weight: 600;
+  color: var(--text-secondary);
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.data-grid tbody tr:hover {
+  background-color: rgba(0,0,0,0.02);
+}
+</style>
+
+<script>
+(function() {
+  let contratosData = [];
+
+  function loadContratos() {
+    google.script.run
+      .withSuccessHandler(function(response) {
+        contratosData = response;
+        renderContratos(contratosData);
+      })
+      .withFailureHandler(function(error) {
+        console.error("Error al cargar contratos:", error);
+        document.getElementById('contratos-tbody').innerHTML = `
+          <tr>
+            <td colspan="5" class="text-center" style="padding: 40px; color: var(--danger-mod, #ef4444);">
+              Error al cargar los datos. Por favor, intente nuevamente.
+            </td>
+          </tr>
+        `;
+      })
+      .getContratosList();
+  }
+
+  function renderContratos(data) {
+    const tbody = document.getElementById('contratos-tbody');
+    
+    if (!data || data.length === 0) {
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="5" class="text-center" style="padding: 40px; color: var(--text-secondary);">
+            No se encontraron contratos.
+          </td>
+        </tr>
+      `;
+      return;
+    }
+
+    tbody.innerHTML = data.map(c => {
+      const badgeClass = c.estatus === 'VIGENTE' ? 'badge-vigente' : 'badge-vencido';
+      const ampliacionHtml = c.tiene_ampliacion ? \`<span class="ampliacion-indicator" title="Tiene ampliación">+AMP</span>\` : '';
+      
+      return \`
+        <tr>
+          <td><strong>\${c.licitacion}</strong></td>
+          <td>\${c.proveedor}</td>
+          <td>\${c.denominacion}</td>
+          <td>\${c.fecha_inicio} a \${c.fecha_fin} \${ampliacionHtml}</td>
+          <td><span class="badge \${badgeClass}">\${c.estatus}</span></td>
+        </tr>
+      \`;
+    }).join('');
+  }
+
+  // Filtrado
+  const searchInput = document.getElementById('search-contratos');
+  if (searchInput) {
+    searchInput.addEventListener('input', function(e) {
+      const term = e.target.value.toLowerCase();
+      const filtered = contratosData.filter(c => 
+        c.licitacion.toLowerCase().includes(term) || 
+        c.proveedor.toLowerCase().includes(term) ||
+        c.denominacion.toLowerCase().includes(term)
+      );
+      renderContratos(filtered);
+    });
+  }
+
+  // Auto-ejecutar
+  loadContratos();
+})();
+</script>

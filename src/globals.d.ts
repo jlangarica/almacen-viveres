@@ -42,6 +42,18 @@ declare function savePedido(articulos: PedidoArticulo[]): string;
 declare function setLargeCache(key: string, value: string, expiration: number): void;
 declare function getLargeCache(key: string): string | null;
 
+interface Contrato {
+  id_contrato: string;
+  proveedor: string;
+  licitacion: string;
+  denominacion: string;
+  fecha_inicio: string;
+  fecha_fin: string;
+  tiene_ampliacion: boolean;
+  estatus: 'VIGENTE' | 'VENCIDO';
+}
+declare function getContratosList(forceRefresh?: boolean): Contrato[];
+
 // ─── Main.ts Exports ────────────────────────────────────────────────────────────
 
 declare function include(filename: string): string;

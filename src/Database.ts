@@ -307,3 +307,55 @@ function savePedidoAndUpdateStock(pedidoData: PedidoData): { exito: boolean; fol
     CacheService.getScriptCache().remove(CATALOG_CACHE_KEY); // Invalidar caché
   }
 }
+
+/**
+ * Obtiene la lista de contratos desde la base de datos.
+ * Utiliza patrón de lotes y caché segmentado.
+ * 
+ * @param forceRefresh - Si es true, invalida el caché y consulta la hoja.
+ * @returns Arreglo de objetos con los datos de los contratos.
+ */
+function getContratosList(forceRefresh: boolean = false) {
+  if (!isAuthorized()) throw new Error("Unauthorized");
+  const CACHE_KEY = 'contratos_list_json';
+  
+  if (!forceRefresh) {
+    const cachedData = getLargeCache(CACHE_KEY);
+    if (cachedData) return JSON.parse(cachedData);
+  }
+
+  const ss = SpreadsheetApp.openById(DB_ALMV_ID);
+  const sheet = ss.getSheetByName('Contratos');
+  if (!sheet) throw new Error("Hoja Contratos no encontrada");
+
+  const data = sheet.getDataRange().getValues();
+  if (data.length < 2) return [];
+
+  const hoy = new Date().getTime();
+
+  const contratos = data.slice(1).map(row => {
+    if (!row[0]) return null;
+    
+    // Manejo seguro de fechas
+    const fInicio = row[4] instanceof Date ? row[4] : new Date(row[4]);
+    const fFinOrig = row[5] instanceof Date ? row[5] : new Date(row[5]);
+    const fFinAmp = row[6] ? (row[6] instanceof Date ? row[6] : new Date(row[6])) : null;
+    
+    const fechaFinReal = fFinAmp || fFinOrig;
+    const estatus = fechaFinReal.getTime() >= hoy ? 'VIGENTE' : 'VENCIDO';
+
+    return {
+      id_contrato: String(row[0]),
+      proveedor: String(row[1]),
+      licitacion: String(row[2]),
+      denominacion: String(row[3]),
+      fecha_inicio: fInicio.toISOString().split('T')[0],
+      fecha_fin: fechaFinReal.toISOString().split('T')[0],
+      tiene_ampliacion: !!row[6],
+      estatus: estatus
+    };
+  }).filter(c => c !== null);
+
+  setLargeCache(CACHE_KEY, JSON.stringify(contratos), 3600);
+  return contratos;
+}
