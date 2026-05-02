@@ -15,6 +15,7 @@ interface SolicitudRequisicion {
 /** Resultado del cálculo de requisición para un insumo individual. */
 interface ResultadoRequisicion {
   codigo: string;
+  id_contrato?: string;
   descripcion?: string;
   unidad?: string;
   cantidadSolicitada?: number;
@@ -26,6 +27,7 @@ interface ResultadoRequisicion {
   alertaExceso?: boolean;
   costoEstimado?: number;
   error?: string;
+  mensaje?: string;
 }
 
 /** Mapa de factores de merma por familia de insumo. */
@@ -82,8 +84,20 @@ function calculateOrderRequisition(solicitudes: SolicitudRequisicion[]): Resulta
     const unidadesComerciales = Math.ceil(cantidadNeta); // Redondeo siempre hacia arriba
     const desperdicioEstimado = unidadesComerciales - cantidadNeta;
 
+    if (unidadesComerciales > insumo.cantidad_disponible) {
+      resultados.push({
+        codigo: insumo.codigo,
+        id_contrato: insumo.id_contrato,
+        descripcion: insumo.descripcion,
+        error: 'STOCK_INSUFICIENTE',
+        mensaje: `Sobregiro: Se requieren ${unidadesComerciales} unidades, pero solo hay ${insumo.cantidad_disponible} disponibles en el contrato ${insumo.id_contrato}.`
+      });
+      return; // Detiene el procesamiento de esta línea, se marca como inválida
+    }
+
     resultados.push({
       codigo: insumo.codigo,
+      id_contrato: insumo.id_contrato,
       descripcion: insumo.descripcion,
       unidad: insumo.unidad_medida,
       cantidadSolicitada: Number(req.cantidadSolicitada),
