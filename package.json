@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "Almacén de Víveres - Hospital Civil de Guadalajara",
   "scripts": {
-    "build": "rm -rf dist && npx tsc && find dist -type f -name '*.js' -exec sed -i '/^export {};/d' {} \\; && cp src/appsscript.json dist/ && cp -r src/ui dist/ui && find dist -type f -name '*.ts' -delete",
+    "build": "rm -rf dist && npx tsc && cp src/appsscript.json dist/ && cp -r src/ui dist/ui && find dist -type f -name '*.ts' -delete",
     "push": "npm run build && clasp push -f"
   },
   "devDependencies": {
