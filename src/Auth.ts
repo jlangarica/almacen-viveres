@@ -39,32 +39,27 @@ function isUserAuthorized(email) {
   }
 
   // Capa 3 (Spreadsheet - Batching)
-  const lock = LockService.getScriptLock();
   try {
-    // Esperar hasta 30 segundos por el bloqueo para evitar colisiones
-    if (lock.tryLock(30000)) {
-      const ss = SpreadsheetApp.openById(SS_ID);
-      const sheet = ss.getSheetByName(SHEET_NAME);
-      
-      if (!sheet) {
-        throw new Error(`No se encontró la hoja con el nombre: ${SHEET_NAME}`);
-      }
-
-      // Usa el patrón de lotes: const data = sheet.getDataRange().getValues();
-      const data = sheet.getDataRange().getValues();
-      
-      // Busca el índice de la columna 'email' (Columna 3, Índice 2)
-      // Mapea la columna: const emails = data.slice(1).map(row => row[2].toString().toLowerCase());
-      const emailIndex = 2;
-      const emails = data.slice(1)
-        .map(row => row[emailIndex] ? row[emailIndex].toString().toLowerCase().trim() : "")
-        .filter(e => e !== "");
-
-      // Guarda la lista en caché como string JSON por 1200 segundos (20 min).
-      cache.put(CACHE_KEY, JSON.stringify(emails), 1200);
-
-      return emails.includes(targetEmail);
+    const ss = SpreadsheetApp.openById(SS_ID);
+    const sheet = ss.getSheetByName(SHEET_NAME);
+    
+    if (!sheet) {
+      throw new Error(`No se encontró la hoja con el nombre: ${SHEET_NAME}`);
     }
+
+    // Usa el patrón de lotes: const data = sheet.getDataRange().getValues();
+    const data = sheet.getDataRange().getValues();
+    
+    // Busca el índice de la columna 'email' (Columna 3, Índice 2)
+    const emailIndex = 2;
+    const emails = data.slice(1)
+      .map(row => row[emailIndex] ? row[emailIndex].toString().toLowerCase().trim() : "")
+      .filter(e => e !== "");
+
+    // Guarda la lista en caché como string JSON por 1200 segundos (20 min).
+    cache.put(CACHE_KEY, JSON.stringify(emails), 1200);
+
+    return emails.includes(targetEmail);
   } catch (err) {
     // Manejo de Errores y Logs: Si el SS_ID no es accesible, dispara console.error con un objeto JSON
     console.error(JSON.stringify({
@@ -73,8 +68,6 @@ function isUserAuthorized(email) {
       timestamp: new Date().toISOString(),
       details: err.toString()
     }));
-  } finally {
-    lock.releaseLock();
   }
 
   return false;

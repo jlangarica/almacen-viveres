@@ -12,15 +12,18 @@ const CATALOG_CACHE_KEY = 'adjudicados_catalog_json';
  * 
  * @returns {Array<Object>} Arreglo de objetos con los datos de los artículos.
  */
-function getAdjudicadosCatalog() {
+function getAdjudicadosCatalog(forceRefresh = false) {
   if (!isAuthorized()) throw new Error("Unauthorized");
-  const cachedData = getLargeCache(CATALOG_CACHE_KEY);
   
-  if (cachedData) {
-    try {
-      return JSON.parse(cachedData);
-    } catch (e) {
-      console.warn("Error parseando caché segmentado, recargando...");
+  if (!forceRefresh) {
+    const cachedData = getLargeCache(CATALOG_CACHE_KEY);
+    
+    if (cachedData) {
+      try {
+        return JSON.parse(cachedData);
+      } catch (e) {
+        console.warn("Error parseando caché segmentado, recargando...");
+      }
     }
   }
 
@@ -140,8 +143,11 @@ function savePedido(articulos) {
       }
 
       const lastRow = sheet.getLastRow();
-      const nextId = lastRow === 1 ? 1 : lastRow; // Si solo hay cabeceras, ID 1
+      const props = PropertiesService.getScriptProperties();
+      const currentIdStr = props.getProperty('LAST_PEDIDO_ID') || '0';
+      const nextId = parseInt(currentIdStr, 10) + 1;
       const folio = 'PED-' + nextId.toString().padStart(3, '0');
+      props.setProperty('LAST_PEDIDO_ID', nextId.toString());
       const fecha = new Date();
       const usuario = Session.getActiveUser().getEmail();
 
