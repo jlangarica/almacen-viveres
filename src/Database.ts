@@ -22,6 +22,13 @@ interface Adjudicado {
   hco_max: number;
   opd_max: number;
   total_max: number;
+  // --- NUEVAS COLUMNAS DE CONTROL ---
+  cantidad_consumida: number;
+  cantidad_disponible: number;
+  cantidad_ampliada: number;
+  importe_consumido: number;
+  importe_disponible: number;
+  porcentaje_disponible: number;
 }
 
 /** Artículo individual dentro del payload de un pedido entrante. */
@@ -114,22 +121,31 @@ function getAdjudicadosCatalog(forceRefresh: boolean = false): Adjudicado[] {
 
     const rows = data.slice(1);
 
-    const catalog: Adjudicado[] = rows.map((row): Adjudicado => {
+    const catalog: Adjudicado[] = rows.map((row): Adjudicado | null => {
+      if (!row[3] && !row[4]) return null;
+
       return {
         id_adjudicado: String(row[0] || ''),
         id_contrato: String(row[1] || ''),
-        familia: String(row[2] || '').toUpperCase().trim(),
-        codigo: String(row[3] || ''),
-        descripcion: String(row[4] || '').replace(/"/g, '\\"'),
+        familia: String(row[2] || 'SIN FAMILIA').toUpperCase().trim(),
+        codigo: String(row[3] || 'N/A'),
+        descripcion: String(row[4] || 'Sin descripción').replace(/"/g, '\\"'),
         unidad_medida: String(row[5] || 'PZA'),
         precio_unitario: Number(row[6] || 0),
         faa_max: Number(row[8] || 0),
         jim_max: Number(row[10] || 0),
         hco_max: Number(row[12] || 0),
         opd_max: Number(row[14] || 0),
-        total_max: Number(row[16] || 0)
+        total_max: Number(row[16] || 0),
+        // --- NUEVAS COLUMNAS DE CONTROL ---
+        cantidad_consumida: Number(row[17] || 0),
+        cantidad_disponible: Number(row[18] || 0),
+        cantidad_ampliada: Number(row[22] || 0),
+        importe_consumido: Number(row[23] || 0),
+        importe_disponible: Number(row[24] || 0),
+        porcentaje_disponible: Number(row[25] || 0)
       };
-    });
+    }).filter((item): item is Adjudicado => item !== null);
 
     // Guardar en caché segmentado por 1 hora (3600 segundos)
     setLargeCache(CATALOG_CACHE_KEY, JSON.stringify(catalog), 3600);

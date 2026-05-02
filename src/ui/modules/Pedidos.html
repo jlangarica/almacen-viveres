@@ -50,6 +50,7 @@
             <tr>
               <th>Código</th>
               <th>Descripción</th>
+              <th style="text-align: right;">Stock Disp.</th>
               <th style="text-align: right;">Solicitado</th>
               <th style="text-align: right;">Unid. Entregar</th>
               <th>Acciones</th>
@@ -57,7 +58,7 @@
           </thead>
           <tbody id="pedidoBody">
             <tr id="emptyRow">
-              <td colspan="5" style="text-align: center; color: #888; padding: 2rem;">No hay insumos agregados aún.</td>
+              <td colspan="6" style="text-align: center; color: #888; padding: 2rem;">No hay insumos agregados aún.</td>
             </tr>
           </tbody>
         </table>
@@ -321,6 +322,7 @@
       tr.innerHTML = `
         <td>${sol.codigo}</td>
         <td>${sol.descripcion}</td>
+        <td style="text-align: right;">${sol.procesado ? (sol.limiteMaximo !== undefined ? sol.limiteMaximo : '-') : '-'}</td>
         <td style="text-align: right;">${sol.cantidadSolicitada}</td>
         <td style="text-align: right; font-weight: bold;">
           ${sol.procesado ? (sol.error ? 'Error' : sol.unidadesComerciales) : '<span style="color:#aaa;">Pte.</span>'}
@@ -334,6 +336,20 @@
       
       pedidoBody.appendChild(tr);
     });
+
+    // Calcular y mostrar total estimado
+    if (solicitudes.some(s => s.procesado && !s.error)) {
+      const totalEstimado = solicitudes.reduce((sum, sol) => sum + (sol.costoEstimado || 0), 0);
+      const totalRow = document.createElement('tr');
+      totalRow.style.backgroundColor = '#f8f9fa';
+      totalRow.style.fontWeight = 'bold';
+      totalRow.innerHTML = `
+        <td colspan="4" style="text-align: right;">Total Estimado (MXN):</td>
+        <td style="text-align: right; color: #0f9d58;">$${totalEstimado.toFixed(2)}</td>
+        <td></td>
+      `;
+      pedidoBody.appendChild(totalRow);
+    }
   }
 
   function handleProcesar() {

@@ -24,6 +24,7 @@ interface ResultadoRequisicion {
   desperdicioEstimado?: number;
   limiteMaximo?: number;
   alertaExceso?: boolean;
+  costoEstimado?: number;
   error?: string;
 }
 
@@ -90,8 +91,9 @@ function calculateOrderRequisition(solicitudes: SolicitudRequisicion[]): Resulta
       cantidadNeta: Number(cantidadNeta.toFixed(2)),
       unidadesComerciales: unidadesComerciales, // Esto es lo que sale del almacén
       desperdicioEstimado: Number(desperdicioEstimado.toFixed(2)),
-      limiteMaximo: insumo.total_max,
-      alertaExceso: unidadesComerciales > insumo.total_max
+      limiteMaximo: insumo.cantidad_disponible,
+      alertaExceso: unidadesComerciales > insumo.cantidad_disponible,
+      costoEstimado: unidadesComerciales * insumo.precio_unitario
     });
   });
 
