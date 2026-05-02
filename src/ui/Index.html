@@ -1,129 +1,800 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <base target="_top">
-    <?!= include('ui/Styles'); ?>
-  </head>
-  <body>
-    <div class="app-wrapper">
-      <!-- Sidebar Navigation -->
-      <aside class="sidebar">
-        <div class="sidebar-header" style="text-align: center; padding: 20px 10px;">
-          <img src="https://portal.hcg.gob.mx/hcg/sites/hcgtransparencia.dd/files/styles/boletines_galeria_eventos/public/imgEventosCS/Logotipo%20HCG_17.jpg?itok=Hix5xedr" 
-               alt="HCG Logo" 
-               class="sidebar-logo">
-          <div class="brand-title">OPD HOSPITAL CIVIL DE GUADALAJARA</div>
-          <div class="brand-subtitle">Almacén de Víveres</div>
-        </div>
-        
-        <nav class="nav-menu">
-          <div class="nav-item active" onclick="loadModule('Dashboard', this, 'Dashboard')">
-            <div class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg></div>
-            <span>Dashboard</span>
-          </div>
-          
-          <div class="nav-item" onclick="loadModule('Almacenes', this, 'Almacenes')">
-            <div class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg></div>
-            <span>Almacenes</span>
-          </div>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <base target="_top">
+  <?!= include('ui/Styles'); ?>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  
+  <style>
+    /* ═══════════════════════════════════════════
+       DESIGN TOKENS (Sistema unificado)
+       ═══════════════════════════════════════════ */
+    :root {
+      --bg: #FFFFFF;
+      --bg-elevated: #F8F9FB;
+      --bg-hover: #F4F5F8;
+      --bg-active: #ECEEF3;
+      --fg: #1A1D26;
+      --fg-secondary: #5F6578;
+      --fg-tertiary: #9198AB;
+      --border: #E2E5EC;
+      --border-light: #EEF0F4;
+      --primary: #0D6E3F;
+      --primary-light: #E6F4EC;
+      --primary-dark: #095C33;
+      --sidebar-bg: #111318;
+      --sidebar-hover: rgba(255,255,255,0.06);
+      --sidebar-active: rgba(13,110,63,0.2);
+      --sidebar-text: #8B8FA3;
+      --sidebar-text-active: #FFFFFF;
+      --sidebar-border: rgba(255,255,255,0.06);
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --shadow-sm: 0 2px 8px rgba(0,0,0,0.04);
+      --shadow-md: 0 4px 16px rgba(0,0,0,0.06);
+      --shadow-lg: 0 12px 40px rgba(0,0,0,0.08);
+      --transition-fast: 150ms cubic-bezier(0.2, 0, 0, 1);
+      --transition-base: 250ms cubic-bezier(0.2, 0, 0, 1);
+      --transition-slow: 400ms cubic-bezier(0.2, 0, 0, 1);
+      --sidebar-width: 260px;
+      --topbar-height: 64px;
+    }
 
-          <div class="nav-item" onclick="loadModule('Pedidos', this, 'Pedidos')">
-            <div class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg></div>
-            <span>Pedidos</span>
-          </div>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-          <div class="nav-item" onclick="loadModule('Contratos', this, 'Contratos')">
-            <div class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><polyline points="17 11 19 13 23 9"></polyline></svg></div>
-            <span>Contratos</span>
-          </div>
+    body {
+      font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg);
+      color: var(--fg);
+      font-size: 14px;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+      overflow: hidden;
+      height: 100vh;
+    }
 
-          <div class="nav-item" onclick="loadModule('Salidas', this, 'Salidas')">
-            <div class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 17l5-5-5-5"></path><path d="M13.8 12H3"></path></svg></div>
-            <span>Salidas</span>
-          </div>
+    /* ═══════════════════════════════════════════
+       APP SHELL LAYOUT (CSS Grid)
+       ═══════════════════════════════════════════ */
+    .app-wrapper {
+      display: grid;
+      grid-template-columns: var(--sidebar-width) 1fr;
+      height: 100vh;
+      width: 100vw;
+    }
 
-          <div class="nav-item" onclick="loadModule('Entradas', this, 'Entradas')">
-            <div class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 17l-5-5 5-5"></path><path d="M11.2 12H21"></path></svg></div>
-            <span>Entradas</span>
-          </div>
+    /* ═══════════════════════════════════════════
+       SIDEBAR
+       ═══════════════════════════════════════════ */
+    .sidebar {
+      background: var(--sidebar-bg);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      z-index: 50;
+      transition: transform var(--transition-slow);
+      border-right: 1px solid var(--sidebar-border);
+    }
 
-          <div class="nav-item" onclick="loadModule('OrdenesCompra', this, 'Ordenes de Compra')">
-            <div class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg></div>
-            <span>Ordenes de Compra</span>
-          </div>
+    .sidebar-header {
+      padding: 24px 20px 20px;
+      border-bottom: 1px solid var(--sidebar-border);
+      text-align: center;
+    }
 
-          <div class="nav-item" onclick="loadModule('Recepciones', this, 'Recepciones')">
-            <div class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"></polyline><path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"></path></svg></div>
-            <span>Recepciones</span>
-          </div>
+    .sidebar-logo {
+      width: 52px;
+      height: 52px;
+      border-radius: var(--radius-md);
+      object-fit: cover;
+      margin-bottom: 12px;
+      border: 2px solid rgba(255,255,255,0.1);
+      transition: transform var(--transition-base);
+    }
 
-          <div class="nav-item" onclick="loadModule('Proveedores', this, 'Proveedores')">
-            <div class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 3h15v13H1z"/><path d="M16 8h6l2 3v5h-8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg></div>
-            <span>Proveedores</span>
-          </div>
+    .sidebar-logo:hover { transform: scale(1.05); }
 
-          <div class="nav-item" onclick="loadModule('Pacientes', this, 'Pacientes')">
-            <div class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg></div>
-            <span>Pacientes</span>
-          </div>
+    .brand-title {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--sidebar-text-active);
+      letter-spacing: 0.5px;
+      line-height: 1.4;
+      text-transform: uppercase;
+    }
 
-          <div class="nav-item" onclick="loadModule('Servicios', this, 'Servicios')">
-            <div class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg></div>
-            <span>Servicios</span>
-          </div>
-        </nav>
-      </aside>
+    .brand-subtitle {
+      font-size: 11px;
+      color: var(--sidebar-text);
+      margin-top: 2px;
+      font-weight: 500;
+    }
 
-      <!-- Main Content Area -->
-      <main class="main-content">
-        <!-- Top Bar -->
-        <header class="top-bar">
-          <div class="page-title" id="current-page-title">Dashboard</div>
-          
-          <div class="user-profile">
-            <div class="user-info">
-              <div class="user-name">Usuario Conectado</div>
-              <div class="user-email-small"><?= getUserEmail(); ?></div>
-            </div>
-            <div class="avatar">
-              <?= getUserEmail().charAt(0).toUpperCase(); ?>
-            </div>
-          </div>
-        </header>
+    /* Navigation */
+    .nav-menu {
+      flex: 1;
+      padding: 12px 12px;
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
 
-        <!-- Dynamic Content Container -->
-        <div id="content-area">
-          <div class="view-container">
-            <!-- Dashboard Home (Default) -->
-            <div class="stats-grid">
-              <div class="stat-card" onclick="loadModule('Almacenes')">
-                <div class="stat-icon bg-blue"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path></svg></div>
-                <div class="stat-info"><h3>Almacenes</h3><p>Gestión de Stock</p></div>
-              </div>
-              <div class="stat-card" onclick="loadModule('Pedidos')">
-                <div class="stat-icon bg-green"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path></svg></div>
-                <div class="stat-info"><h3>Pedidos</h3><p>Pendientes por surtir</p></div>
-              </div>
-              <div class="stat-card" onclick="loadModule('Contratos')">
-                <div class="stat-icon bg-orange"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path></svg></div>
-                <div class="stat-info"><h3>Contratos</h3><p>Vigentes 2024</p></div>
-              </div>
-              <div class="stat-card" onclick="loadModule('Salidas')">
-                <div class="stat-icon bg-red"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 17l5-5-5-5"></path></svg></div>
-                <div class="stat-info"><h3>Salidas</h3><p>Registro Diario</p></div>
-              </div>
-            </div>
-          </div>
-        </div>
-        
-        <!-- Global Loader -->
-        <div id="app-loader" class="loader">
-          <div class="spinner"></div>
-          <p>Cargando módulo...</p>
-        </div>
-      </main>
+    .nav-section-title {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--sidebar-text);
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      padding: 16px 12px 8px;
+      opacity: 0.6;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 12px;
+      border-radius: var(--radius-sm);
+      color: var(--sidebar-text);
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      position: relative;
+      margin-bottom: 2px;
+      font-size: 14px;
+      font-weight: 500;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .nav-item:hover {
+      background: var(--sidebar-hover);
+      color: var(--sidebar-text-active);
+    }
+
+    .nav-item:active { transform: scale(0.98); }
+
+    /* Indicador Animado Activo */
+    .nav-item.active {
+      background: var(--sidebar-active);
+      color: var(--sidebar-text-active);
+      font-weight: 600;
+    }
+
+    .nav-item.active::before {
+      content: '';
+      position: absolute;
+      left: -12px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 3px;
+      height: 24px;
+      background: var(--primary);
+      border-radius: 0 4px 4px 0;
+      box-shadow: 0 0 12px rgba(13,110,63,0.4);
+      animation: slideIn 300ms cubic-bezier(0.2, 0, 0, 1);
+    }
+
+    @keyframes slideIn {
+      from { height: 0; opacity: 0; }
+      to   { height: 24px; opacity: 1; }
+    }
+
+    .nav-icon {
+      width: 20px;
+      height: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: transform var(--transition-fast);
+    }
+
+    .nav-item:hover .nav-icon { transform: translateX(2px); }
+
+    .nav-item.active .nav-icon { color: var(--primary); }
+
+    /* Sidebar Footer */
+    .sidebar-footer {
+      padding: 16px 20px;
+      border-top: 1px solid var(--sidebar-border);
+      font-size: 11px;
+      color: var(--sidebar-text);
+      text-align: center;
+      opacity: 0.5;
+    }
+
+    /* ═══════════════════════════════════════════
+       MAIN CONTENT
+       ═══════════════════════════════════════════ */
+    .main-content {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+      background: var(--bg);
+    }
+
+    /* ═══════════════════════════════════════════
+       TOP BAR
+       ═══════════════════════════════════════════ */
+    .top-bar {
+      height: var(--topbar-height);
+      padding: 0 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border-light);
+      background: var(--bg);
+      flex-shrink: 0;
+      z-index: 10;
+    }
+
+    .top-bar-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .hamburger {
+      display: none;
+      width: 36px; height: 36px;
+      border: none; background: var(--bg-elevated);
+      border-radius: var(--radius-sm); cursor: pointer;
+      align-items: center; justify-content: center;
+      color: var(--fg-secondary); transition: all var(--transition-fast);
+    }
+    .hamburger:hover { background: var(--bg-hover); color: var(--fg); }
+
+    .page-title {
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--fg);
+      letter-spacing: -0.3px;
+      transition: opacity 200ms;
+    }
+
+    .user-profile {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .user-info { text-align: right; }
+
+    .user-name {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--fg);
+    }
+
+    .user-email-small {
+      font-size: 11px;
+      color: var(--fg-tertiary);
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .avatar {
+      width: 38px;
+      height: 38px;
+      border-radius: var(--radius-sm);
+      background: var(--primary);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 16px;
+      box-shadow: 0 2px 8px rgba(13,110,63,0.2);
+      transition: transform var(--transition-fast);
+    }
+
+    .avatar:hover { transform: scale(1.05); }
+
+    /* ═══════════════════════════════════════════
+       CONTENT AREA
+       ═══════════════════════════════════════════ */
+    #content-area {
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    /* Transición de entrada de módulos */
+    #content-area.loading {
+      opacity: 0.5;
+      pointer-events: none;
+      filter: blur(2px);
+      transition: all var(--transition-base);
+    }
+
+    #content-area.loaded {
+      opacity: 1;
+      filter: blur(0);
+      transition: all var(--transition-base);
+    }
+
+    /* View Container Base (Heredado por módulos) */
+    .view-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 32px;
+      animation: moduleIn 400ms cubic-bezier(0.2, 0, 0, 1) both;
+    }
+
+    @keyframes moduleIn {
+      from { opacity: 0; transform: translateY(12px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ═══════════════════════════════════════════
+       GLOBAL LOADER (Overlay)
+       ═══════════════════════════════════════════ */
+    .loader-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(255,255,255,0.8);
+      backdrop-filter: blur(4px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 20;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity var(--transition-base);
+    }
+
+    .loader-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .loader-spinner {
+      width: 32px; height: 32px;
+      border: 3px solid var(--border);
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin 800ms linear infinite;
+    }
+
+    .loader-text {
+      margin-top: 12px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--fg-tertiary);
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ═══════════════════════════════════════════
+       DASHBOARD GRID (Default Content)
+       ═══════════════════════════════════════════ */
+    .modules-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+    }
+
+    .mod-card {
+      background: var(--bg);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      cursor: pointer;
+      transition: all var(--transition-base);
+      position: relative;
+      overflow: hidden;
+      animation: cardIn 400ms cubic-bezier(0.2, 0, 0, 1) both;
+    }
+
+    .mod-card:nth-child(1) { animation-delay: 0ms; }
+    .mod-card:nth-child(2) { animation-delay: 60ms; }
+    .mod-card:nth-child(3) { animation-delay: 120ms; }
+    .mod-card:nth-child(4) { animation-delay: 180ms; }
+
+    @keyframes cardIn {
+      from { opacity: 0; transform: translateY(16px) scale(0.97); }
+      to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .mod-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: -100%;
+      width: 100%; height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+      transition: left 600ms ease-in-out;
+      z-index: 1; pointer-events: none;
+    }
+
+    .mod-card:hover::before { left: 100%; }
+
+    .mod-card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-md);
+      border-color: transparent;
+    }
+
+    .mod-card:active { transform: translateY(-1px) scale(0.98); box-shadow: var(--shadow-sm); }
+
+    .mod-card-icon {
+      width: 48px; height: 48px;
+      border-radius: var(--radius-md);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; transition: transform var(--transition-slow);
+    }
+
+    .mod-card:hover .mod-card-icon { transform: scale(1.08) rotate(-3deg); }
+    .mod-card:active .mod-card-icon { transform: scale(0.95); }
+
+    .mod-card-icon.emerald { background: #E6F4EC; color: #0D6E3F; }
+    .mod-card-icon.teal { background: #E4F3EF; color: #0D6E5F; }
+    .mod-card-icon.amber { background: #FEF3C7; color: #B45309; }
+    .mod-card-icon.rose { background: #FFE4E6; color: #BE123C; }
+
+    .mod-card-title { font-size: 15px; font-weight: 700; color: var(--fg); }
+    .mod-card-desc { font-size: 12px; color: var(--fg-tertiary); font-weight: 500; margin-top: 2px; }
+
+    .mod-card-arrow {
+      color: var(--fg-tertiary); opacity: 0; transform: translateX(-8px);
+      transition: all var(--transition-base); flex-shrink: 0; margin-left: auto;
+    }
+
+    .mod-card:hover .mod-card-arrow { opacity: 1; transform: translateX(0); }
+
+    /* ═══════════════════════════════════════════
+       SCROLLBAR & A11Y
+       ═══════════════════════════════════════════ */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 100px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--fg-tertiary); }
+
+    :focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+
+    /* ═══════════════════════════════════════════
+       MOBILE OVERLAY
+       ═══════════════════════════════════════════ */
+    .sidebar-overlay {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 40;
+      opacity: 0;
+      transition: opacity var(--transition-base);
+    }
+
+    .sidebar-overlay.active { opacity: 1; }
+
+    /* ═══════════════════════════════════════════
+       RESPONSIVE
+       ═══════════════════════════════════════════ */
+    @media (max-width: 768px) {
+      .app-wrapper { grid-template-columns: 1fr; }
+      
+      .sidebar {
+        position: fixed;
+        left: 0; top: 0; bottom: 0;
+        width: var(--sidebar-width);
+        transform: translateX(-100%);
+        z-index: 50;
+      }
+
+      .sidebar.open { transform: translateX(0); }
+      
+      .sidebar-overlay { display: block; }
+      
+      .hamburger { display: flex; }
+      
+      .top-bar { padding: 0 16px; }
+      .view-container { padding: 16px; }
+      .modules-grid { grid-template-columns: 1fr; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="app-wrapper">
+  <!-- Mobile Overlay -->
+  <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar" role="navigation" aria-label="Menú principal">
+    <div class="sidebar-header">
+      <img src="https://portal.hcg.gob.mx/hcg/sites/hcgtransparencia.dd/files/styles/boletines_galeria_eventos/public/imgEventosCS/Logotipo%20HCG_17.jpg?itok=Hix5xedr" 
+           alt="Logo HCG" class="sidebar-logo"
+           onerror="this.style.display='none'">
+      <div class="brand-title">OPD Hospital Civil de Guadalajara</div>
+      <div class="brand-subtitle">Almacén de Víveres</div>
     </div>
+    
+    <nav class="nav-menu" id="nav-menu">
+      <div class="nav-section-title">Principal</div>
 
-    <?!= include('ui/Scripts'); ?>
-  </body>
+      <div class="nav-item active" data-module="Dashboard" data-title="Dashboard" tabindex="0" role="menuitem" aria-current="page">
+        <div class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg></div>
+        <span>Dashboard</span>
+      </div>
+      
+      <div class="nav-item" data-module="Almacenes" data-title="Almacenes" tabindex="0" role="menuitem">
+        <div class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg></div>
+        <span>Almacenes</span>
+      </div>
+
+      <div class="nav-item" data-module="Pedidos" data-title="Pedidos" tabindex="0" role="menuitem">
+        <div class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg></div>
+        <span>Pedidos</span>
+      </div>
+
+      <div class="nav-item" data-module="Contratos" data-title="Contratos" tabindex="0" role="menuitem">
+        <div class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><polyline points="17 11 19 13 23 9"></polyline></svg></div>
+        <span>Contratos</span>
+      </div>
+
+      <div class="nav-section-title">Operaciones</div>
+
+      <div class="nav-item" data-module="Salidas" data-title="Salidas" tabindex="0" role="menuitem">
+        <div class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 17l5-5-5-5"></path><path d="M13.8 12H3"></path></svg></div>
+        <span>Salidas</span>
+      </div>
+
+      <div class="nav-item" data-module="Entradas" data-title="Entradas" tabindex="0" role="menuitem">
+        <div class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 17l-5-5 5-5"></path><path d="M11.2 12H21"></path></svg></div>
+        <span>Entradas</span>
+      </div>
+
+      <div class="nav-item" data-module="OrdenesCompra" data-title="Ordenes de Compra" tabindex="0" role="menuitem">
+        <div class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg></div>
+        <span>Ordenes de Compra</span>
+      </div>
+
+      <div class="nav-item" data-module="Recepciones" data-title="Recepciones" tabindex="0" role="menuitem">
+        <div class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"></polyline><path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"></path></svg></div>
+        <span>Recepciones</span>
+      </div>
+
+      <div class="nav-section-title">Catálogos</div>
+
+      <div class="nav-item" data-module="Proveedores" data-title="Proveedores" tabindex="0" role="menuitem">
+        <div class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 3h15v13H1z"/><path d="M16 8h6l2 3v5h-8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg></div>
+        <span>Proveedores</span>
+      </div>
+
+      <div class="nav-item" data-module="Pacientes" data-title="Pacientes" tabindex="0" role="menuitem">
+        <div class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg></div>
+        <span>Pacientes</span>
+      </div>
+
+      <div class="nav-item" data-module="Servicios" data-title="Servicios" tabindex="0" role="menuitem">
+        <div class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg></div>
+        <span>Servicios</span>
+      </div>
+    </nav>
+
+    <div class="sidebar-footer">v2.0 &middot; Almacén HCG</div>
+  </aside>
+
+  <!-- Main Content Area -->
+  <main class="main-content">
+    <!-- Top Bar -->
+    <header class="top-bar">
+      <div class="top-bar-left">
+        <button class="hamburger" id="hamburger-btn" aria-label="Abrir menú">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
+        <div class="page-title" id="current-page-title">Dashboard</div>
+      </div>
+      
+      <div class="user-profile">
+        <div class="user-info">
+          <div class="user-name">Usuario Conectado</div>
+          <div class="user-email-small"><?= getUserEmail(); ?></div>
+        </div>
+        <div class="avatar"><?= getUserEmail().charAt(0).toUpperCase(); ?></div>
+      </div>
+    </header>
+
+    <!-- Dynamic Content Container -->
+    <div id="content-area" class="loaded">
+      <div class="view-container">
+        <!-- Default Dashboard Content -->
+        <div class="modules-grid" id="dashboard-grid">
+          <div class="mod-card" data-module="Almacenes">
+            <div class="mod-card-icon emerald">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+            </div>
+            <div>
+              <div class="mod-card-title">Almacenes</div>
+              <div class="mod-card-desc">Gestión de Stock</div>
+            </div>
+            <div class="mod-card-arrow"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg></div>
+          </div>
+
+          <div class="mod-card" data-module="Pedidos">
+            <div class="mod-card-icon teal">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+            </div>
+            <div>
+              <div class="mod-card-title">Pedidos</div>
+              <div class="mod-card-desc">Pendientes por surtir</div>
+            </div>
+            <div class="mod-card-arrow"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg></div>
+          </div>
+
+          <div class="mod-card" data-module="Contratos">
+            <div class="mod-card-icon amber">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><line x1="20" y1="8" x2="20" y2="14"></line><line x1="23" y1="11" x2="17" y2="11"></line></svg>
+            </div>
+            <div>
+              <div class="mod-card-title">Contratos</div>
+              <div class="mod-card-desc">Vigentes 2024</div>
+            </div>
+            <div class="mod-card-arrow"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg></div>
+          </div>
+
+          <div class="mod-card" data-module="Salidas">
+            <div class="mod-card-icon rose">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 8 16 12 12 16"></polyline><line x1="8" y1="12" x2="16" y2="12"></line></svg>
+            </div>
+            <div>
+              <div class="mod-card-title">Salidas</div>
+              <div class="mod-card-desc">Registro Diario</div>
+            </div>
+            <div class="mod-card-arrow"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Global Loader -->
+    <div class="loader-overlay" id="app-loader">
+      <div class="loader-spinner"></div>
+      <p class="loader-text">Cargando módulo...</p>
+    </div>
+  </main>
+</div>
+
+<!-- Core App Logic (Debe cargarse antes que los módulos) -->
+<script>
+  /* ═══════════════════════════════════════════
+     DOM REFERENCES
+     ═══════════════════════════════════════════ */
+  const $sidebar = document.getElementById('sidebar');
+  const $overlay = document.getElementById('sidebar-overlay');
+  const $hamburger = document.getElementById('hamburger-btn');
+  const $navMenu = document.getElementById('nav-menu');
+  const $pageTitle = document.getElementById('current-page-title');
+  const $contentArea = document.getElementById('content-area');
+  const $loader = document.getElementById('app-loader');
+  const $dashboardGrid = document.getElementById('dashboard-grid');
+
+  /* ═══════════════════════════════════════════
+     SIDEBAR TOGGLE (Mobile)
+     ═══════════════════════════════════════════ */
+  $hamburger.addEventListener('click', () => {
+    $sidebar.classList.toggle('open');
+    $overlay.classList.toggle('active');
+  });
+
+  $overlay.addEventListener('click', closeSidebar);
+
+  function closeSidebar() {
+    $sidebar.classList.remove('open');
+    $overlay.classList.remove('active');
+  }
+
+  /* ═══════════════════════════════════════════
+     NAVIGATION (Event Delegation)
+     ═══════════════════════════════════════════ */
+  $navMenu.addEventListener('click', (e) => {
+    const navItem = e.target.closest('.nav-item');
+    if (!navItem) return;
+    handleNavigation(navItem);
+  });
+
+  // Soporte para tecla Enter/Space en ítems del menú
+  $navMenu.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      const navItem = e.target.closest('.nav-item');
+      if (navItem) handleNavigation(navItem);
+    }
+  });
+
+  // Click en cards del Dashboard
+  if ($dashboardGrid) {
+    $dashboardGrid.addEventListener('click', (e) => {
+      const card = e.target.closest('.mod-card');
+      if (!card) return;
+      const moduleName = card.dataset.module;
+      const navItem = $navMenu.querySelector(`.nav-item[data-module="${moduleName}"]`);
+      if (navItem) handleNavigation(navItem);
+    });
+  }
+
+  /* ═══════════════════════════════════════════
+     HANDLE NAVIGATION
+     Controla el flujo visual de cambio de módulo.
+     Invoca a la función real de Apps Script.
+     ═══════════════════════════════════════════ */
+  function handleNavigation(navItem) {
+    const moduleName = navItem.dataset.module;
+    const moduleTitle = navItem.dataset.title;
+
+    // Evitar re-cargar el mismo módulo
+    if (navItem.classList.contains('active')) return;
+
+    // 1. Actualizar estado visual del menú
+    $navMenu.querySelectorAll('.nav-item').forEach(item => {
+      item.classList.remove('active');
+      item.removeAttribute('aria-current');
+    });
+    navItem.classList.add('active');
+    navItem.setAttribute('aria-current', 'page');
+
+    // 2. Animar título de la top-bar
+    $pageTitle.style.opacity = '0';
+    setTimeout(() => {
+      $pageTitle.textContent = moduleTitle;
+      $pageTitle.style.opacity = '1';
+    }, 200);
+
+    // 3. Cerrar sidebar en móvil
+    closeSidebar();
+
+    // 4. Disparar la carga real del módulo (definida en ui/Scripts)
+    if (typeof loadModule === 'function') {
+      loadModule(moduleName);
+    }
+  }
+
+  /* ═══════════════════════════════════════════
+     LOADER HELPERS
+     Funciones expuestas globalmente para que
+     ui/Scripts las use al inyectar módulos.
+     ═══════════════════════════════════════════ */
+  window.showAppLoader = function() {
+    $loader.classList.add('active');
+    $contentArea.classList.remove('loaded');
+    $contentArea.classList.add('loading');
+  };
+
+  window.hideAppLoader = function() {
+    $loader.classList.remove('active');
+    $contentArea.classList.remove('loading');
+    $contentArea.classList.add('loaded');
+  };
+
+  /* ═══════════════════════════════════════════
+     OVERRIDE loadModule (Wrapper seguro)
+     Si ui/Scripts define loadModule, lo intercepta
+     para agregar las transiciones visuales.
+     ═══════════════════════════════════════════ */
+  const originalLoadModule = typeof loadModule === 'function' ? loadModule : null;
+
+  window.loadModule = function(moduleName) {
+    window.showAppLoader();
+    
+    // Simula delay de red o delega al script original
+    if (originalLoadModule) {
+      originalLoadModule(moduleName);
+    }
+  };
+</script>
+
+<?!= include('ui/Scripts'); ?>
+</body>
 </html>
