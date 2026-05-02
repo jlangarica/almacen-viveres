@@ -6,21 +6,95 @@
 const DB_ALMV_ID = '1cAy768H0tWJlbb_6zUBr8bH36tKd_iv1csJxwxAI7YU';
 const CATALOG_CACHE_KEY = 'adjudicados_catalog_json';
 
+// ─── Interfaces de Dominio ─────────────────────────────────────────────────────
+
+/** Representa un artículo adjudicado del catálogo de compras. */
+interface Adjudicado {
+  id_adjudicado: string;
+  id_contrato: string;
+  familia: string;
+  codigo: string;
+  descripcion: string;
+  unidad_medida: string;
+  precio_unitario: number;
+  faa_max: number;
+  jim_max: number;
+  hco_max: number;
+  opd_max: number;
+  total_max: number;
+}
+
+/** Artículo individual dentro del payload de un pedido entrante. */
+interface PedidoArticulo {
+  codigo: string;
+  descripcion: string;
+  cantidadSolicitada: number;
+  unidadesComerciales: number;
+}
+
+// ─── Funciones de Caché Segmentado ──────────────────────────────────────────────
+
+/**
+ * Almacena un valor grande en el caché dividiéndolo en fragmentos.
+ * Resuelve el error "Argument too large: value" de CacheService (límite 100KB).
+ *
+ * @param key - Clave base para los fragmentos.
+ * @param value - Cadena JSON completa a almacenar.
+ * @param expiration - TTL en segundos para cada fragmento.
+ */
+function setLargeCache(key: string, value: string, expiration: number): void {
+  const cache = CacheService.getScriptCache();
+  const chunkSize = 90 * 1024; // 90KB por seguridad
+  const chunks: string[] = [];
+
+  for (let i = 0; i < value.length; i += chunkSize) {
+    chunks.push(value.substring(i, i + chunkSize));
+  }
+
+  cache.put(`${key}_count`, chunks.length.toString(), expiration);
+  chunks.forEach((chunk, index) => {
+    cache.put(`${key}_${index}`, chunk, expiration);
+  });
+}
+
+/**
+ * Recupera y ensambla un valor grande dividido en fragmentos desde el caché.
+ *
+ * @param key - Clave base utilizada al almacenar.
+ * @returns La cadena completa reensamblada, o null si el caché expiró o está corrupto.
+ */
+function getLargeCache(key: string): string | null {
+  const cache = CacheService.getScriptCache();
+  const chunkCount = cache.get(`${key}_count`);
+  if (!chunkCount) return null;
+
+  let value = '';
+  for (let i = 0; i < parseInt(chunkCount, 10); i++) {
+    const chunk = cache.get(`${key}_${i}`);
+    if (!chunk) return null; // Falló la integridad del caché
+    value += chunk;
+  }
+  return value;
+}
+
+// ─── Funciones Públicas (Endpoints RPC) ─────────────────────────────────────────
+
 /**
  * Obtiene el catálogo de artículos adjudicados desde la base de datos.
  * Utiliza un patrón de lotes y almacenamiento en caché segmentado para optimizar el rendimiento.
- * 
- * @returns {Array<Object>} Arreglo de objetos con los datos de los artículos.
+ *
+ * @param forceRefresh - Si es true, invalida el caché y consulta la hoja directamente.
+ * @returns Arreglo de objetos con los datos de los artículos.
  */
-function getAdjudicadosCatalog(forceRefresh = false) {
+function getAdjudicadosCatalog(forceRefresh: boolean = false): Adjudicado[] {
   if (!isAuthorized()) throw new Error("Unauthorized");
-  
+
   if (!forceRefresh) {
     const cachedData = getLargeCache(CATALOG_CACHE_KEY);
-    
+
     if (cachedData) {
       try {
-        return JSON.parse(cachedData);
+        return JSON.parse(cachedData) as Adjudicado[];
       } catch (e) {
         console.warn("Error parseando caché segmentado, recargando...");
       }
@@ -30,24 +104,24 @@ function getAdjudicadosCatalog(forceRefresh = false) {
   try {
     const ss = SpreadsheetApp.openById(DB_ALMV_ID);
     const sheet = ss.getSheetByName('Adjudicados');
-    
+
     if (!sheet) {
       throw new Error("ERROR: La hoja Adjudicados no existe en el archivo BD-ALMV.");
     }
 
-    const data = sheet.getDataRange().getValues();
+    const data: unknown[][] = sheet.getDataRange().getValues();
     if (data.length < 2) return [];
 
     const rows = data.slice(1);
 
-    const catalog = rows.map(row => {
+    const catalog: Adjudicado[] = rows.map((row): Adjudicado => {
       return {
-        id_adjudicado: row[0] || '',
-        id_contrato: row[1] || '',
-        familia: (row[2] || '').toString().toUpperCase().trim(),
-        codigo: (row[3] || '').toString(),
-        descripcion: (row[4] || '').toString().replace(/"/g, '\"'), // Escapar comillas
-        unidad_medida: row[5] || 'PZA',
+        id_adjudicado: String(row[0] || ''),
+        id_contrato: String(row[1] || ''),
+        familia: String(row[2] || '').toUpperCase().trim(),
+        codigo: String(row[3] || ''),
+        descripcion: String(row[4] || '').replace(/"/g, '\\"'),
+        unidad_medida: String(row[5] || 'PZA'),
         precio_unitario: Number(row[6] || 0),
         faa_max: Number(row[8] || 0),
         jim_max: Number(row[10] || 0),
@@ -57,11 +131,9 @@ function getAdjudicadosCatalog(forceRefresh = false) {
       };
     });
 
-
     // Guardar en caché segmentado por 1 hora (3600 segundos)
     setLargeCache(CATALOG_CACHE_KEY, JSON.stringify(catalog), 3600);
 
-    
     return catalog;
   } catch (err) {
     console.error("Error al obtener catálogo de adjudicados:", err);
@@ -70,61 +142,12 @@ function getAdjudicadosCatalog(forceRefresh = false) {
 }
 
 /**
- * Almacena un valor grande en el caché dividiéndolo en fragmentos.
- * Resuelve el error "Argument too large: value" de CacheService (límite 100KB).
+ * Guarda un pedido en la base de datos con generación de folio atómico y bloqueo de seguridad.
+ *
+ * @param articulos - Lista de artículos calculados para el pedido.
+ * @returns El folio generado para el pedido.
  */
-function setLargeCache(key, value, expiration) {
-  const cache = CacheService.getScriptCache();
-  const chunkSize = 90 * 1024; // 90KB por seguridad
-  const chunks = [];
-  
-  for (let i = 0; i < value.length; i += chunkSize) {
-    chunks.push(value.substring(i, i + chunkSize));
-  }
-  
-  cache.put(`${key}_count`, chunks.length.toString(), expiration);
-  chunks.forEach((chunk, index) => {
-    cache.put(`${key}_${index}`, chunk, expiration);
-  });
-}
-
-/**
- * Recupera y ensambla un valor grande dividido en fragmentos desde el caché.
- */
-function getLargeCache(key) {
-  const cache = CacheService.getScriptCache();
-  const chunkCount = cache.get(`${key}_count`);
-  if (!chunkCount) return null;
-  
-  let value = '';
-  for (let i = 0; i < parseInt(chunkCount); i++) {
-    const chunk = cache.get(`${key}_${i}`);
-    if (!chunk) return null; // Falló la integridad del caché
-    value += chunk;
-  }
-  return value;
-}
-
-/**
- * Interface JSDoc para referencia de datos:
- * @typedef {Object} Adjudicado
- * @property {string} id_adjudicado
- * @property {string} familia
- * @property {string} codigo
- * @property {string} descripcion
- * @property {string} unidad_medida
- * @property {number} total_max
- * @property {number} faa_max
- * @property {number} jim_max
- * @property {number} hco_max
- */
-
-/**
- * Guarda un pedido en la base de datos con generación de folio y bloqueo de seguridad.
- * @param {Array<Object>} articulos - Lista de artículos calculados para el pedido.
- * @returns {string} El folio generado para el pedido.
- */
-function savePedido(articulos) {
+function savePedido(articulos: PedidoArticulo[]): string {
   if (!isAuthorized()) throw new Error("Unauthorized");
   const lock = LockService.getScriptLock();
   try {
@@ -132,7 +155,7 @@ function savePedido(articulos) {
     if (lock.tryLock(10000)) {
       const ss = SpreadsheetApp.openById(DB_ALMV_ID);
       let sheet = ss.getSheetByName('Pedidos');
-      
+
       // Crear la hoja si no existe
       if (!sheet) {
         sheet = ss.insertSheet('Pedidos');
@@ -152,7 +175,7 @@ function savePedido(articulos) {
       const usuario = Session.getActiveUser().getEmail();
 
       // Preparar matriz para setValues (Batch writing)
-      const values = articulos.map(art => [
+      const values: unknown[][] = articulos.map((art): unknown[] => [
         folio,
         fecha,
         usuario,
@@ -181,7 +204,7 @@ function savePedido(articulos) {
     }
   } catch (err) {
     console.error("Error en savePedido:", err);
-    throw new Error("Error crítico al guardar pedido: " + err.message);
+    throw new Error("Error crítico al guardar pedido: " + (err as Error).message);
   } finally {
     lock.releaseLock();
   }

@@ -4,15 +4,57 @@
  * aplicando factores de merma por categoría.
  */
 
+// ─── Interfaces de Dominio ─────────────────────────────────────────────────────
+
+/** Solicitud individual de insumo desde el frontend. */
+interface SolicitudRequisicion {
+  codigo: string;
+  cantidadSolicitada: number;
+}
+
+/** Resultado del cálculo de requisición para un insumo individual. */
+interface ResultadoRequisicion {
+  codigo: string;
+  descripcion?: string;
+  unidad?: string;
+  cantidadSolicitada?: number;
+  factorAplicado?: number;
+  cantidadNeta?: number;
+  unidadesComerciales?: number;
+  desperdicioEstimado?: number;
+  limiteMaximo?: number;
+  alertaExceso?: boolean;
+  error?: string;
+}
+
+/** Mapa de factores de merma por familia de insumo. */
+interface FactoresMerma {
+  [familia: string]: number;
+}
+
+// ─── Declaraciones Cross-File (GAS Namespace Global) ────────────────────────────
+
 /**
- * Calcula la requisición de orden
- * @param {Array} solicitudes - Array de solicitudes de pedidos
- * @returns {Array} Resultados procesados
+ * Referencia declarativa a la función definida en Database.ts.
+ * En el runtime de GAS, todas las funciones de nivel superior comparten
+ * el mismo namespace global, por lo que esta declaración solo sirve
+ * para informar al compilador de TypeScript.
  */
-function calculateOrderRequisition(solicitudes) {
+declare function getAdjudicadosCatalog(forceRefresh?: boolean): Adjudicado[];
+declare function isAuthorized(): boolean;
+
+// ─── Motor de Cálculo ───────────────────────────────────────────────────────────
+
+/**
+ * Calcula la requisición de orden aplicando factores de merma clínicos.
+ *
+ * @param solicitudes - Array de solicitudes con código e cantidad solicitada.
+ * @returns Array de resultados procesados con unidades comerciales calculadas.
+ */
+function calculateOrderRequisition(solicitudes: SolicitudRequisicion[]): ResultadoRequisicion[] {
   if (!isAuthorized()) throw new Error("Unauthorized");
-  // Factores de merma extraídos de la especificación clínica
-  const FACTORES_MERMA = {
+
+  const FACTORES_MERMA: FactoresMerma = {
     'ABARROTES': 1.05,
     'CARNES': 1.10,
     'FRUTAS Y VERDURAS': 1.15,
@@ -21,21 +63,19 @@ function calculateOrderRequisition(solicitudes) {
     'DEFAULT': 1.05
   };
 
-  // Obtener el catálogo desde la función existente en Database.ts
-  // @ts-ignore - Definida en otro archivo de GAS
-  const catalog = getAdjudicadosCatalog(); 
-  const resultados = [];
+  const catalog: Adjudicado[] = getAdjudicadosCatalog();
+  const resultados: ResultadoRequisicion[] = [];
 
-  solicitudes.forEach(req => {
-    const insumo = catalog.find(i => i.codigo === req.codigo);
+  solicitudes.forEach((req: SolicitudRequisicion) => {
+    const insumo = catalog.find((i: Adjudicado) => i.codigo === req.codigo);
     if (!insumo) {
       resultados.push({ codigo: req.codigo, error: 'INSUMO_NO_ENCONTRADO' });
       return;
     }
 
     const familiaNormalizada = (insumo.familia || '').toUpperCase().trim();
-    const factor = FACTORES_MERMA[familiaNormalizada] || FACTORES_MERMA.DEFAULT;
-    
+    const factor = FACTORES_MERMA[familiaNormalizada] || FACTORES_MERMA['DEFAULT'];
+
     // Algoritmo CEILING de NutriCare
     const cantidadNeta = req.cantidadSolicitada * factor;
     const unidadesComerciales = Math.ceil(cantidadNeta); // Redondeo siempre hacia arriba
@@ -46,7 +86,7 @@ function calculateOrderRequisition(solicitudes) {
       descripcion: insumo.descripcion,
       unidad: insumo.unidad_medida,
       cantidadSolicitada: Number(req.cantidadSolicitada),
-      factorAaplicado: factor,
+      factorAplicado: factor,
       cantidadNeta: Number(cantidadNeta.toFixed(2)),
       unidadesComerciales: unidadesComerciales, // Esto es lo que sale del almacén
       desperdicioEstimado: Number(desperdicioEstimado.toFixed(2)),
