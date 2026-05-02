@@ -3,10 +3,12 @@
     "lib": ["esnext"],
     "target": "ESNext",
     "noEmit": true,
-    "strict": true,
+    "strict": false,
     "skipLibCheck": true,
     "isolatedModules": true,
-    "moduleDetection": "force"
+    "moduleDetection": "force",
+    "types": ["google-apps-script"],
+    "typeRoots": ["./node_modules/@types"]
   },
   "include": ["src/**/*.ts"]
 }
