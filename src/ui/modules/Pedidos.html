@@ -230,8 +230,17 @@
 
   // Llenar datalist con el catálogo
   function populateDatalist() {
-    if (!window.catalogData || !Array.isArray(window.catalogData)) {
-      console.warn("catalogData no está disponible globalmente.");
+    if (!window.catalogData || !Array.isArray(window.catalogData) || window.catalogData.length === 0) {
+      console.log("Cargando catálogo en Pedidos...");
+      google.script.run
+        .withSuccessHandler(function(data) {
+          window.catalogData = data;
+          populateDatalist();
+        })
+        .withFailureHandler(function(err) {
+          console.error("Error al cargar catálogo para Pedidos:", err);
+        })
+        .getAdjudicadosCatalog();
       return;
     }
     
