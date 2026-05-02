@@ -426,15 +426,21 @@ clasp deploy --description "v1.0.0 — Release inicial"
 ### Flujo de trabajo
 
 ```mermaid
-gitgraph
-    commit id: "main"
-    branch feature/modulo-x
-    commit id: "feat: scaffold"
-    commit id: "feat: lógica"
-    commit id: "test: validación"
-    checkout main
-    merge feature/modulo-x id: "PR merge"
-    commit id: "release"
+flowchart LR
+    A["🟢 main"] -->|"branch"| B["feature/modulo-x"]
+    B --> C["feat: scaffold"]
+    C --> D["feat: lógica"]
+    D --> E["test: validación"]
+    E -->|"PR merge"| F["🟢 main"]
+    F --> G["🚀 release"]
+
+    style A fill:#1b5e20,stroke:#4caf50,color:#fff
+    style B fill:#0d47a1,stroke:#42a5f5,color:#fff
+    style C fill:#1565c0,stroke:#42a5f5,color:#fff
+    style D fill:#1565c0,stroke:#42a5f5,color:#fff
+    style E fill:#1565c0,stroke:#42a5f5,color:#fff
+    style F fill:#1b5e20,stroke:#4caf50,color:#fff
+    style G fill:#e65100,stroke:#ff9800,color:#fff
 ```
 
 ### Convenciones de commits
