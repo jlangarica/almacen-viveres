@@ -115,3 +115,66 @@ function getLargeCache(key) {
  * @property {number} hco_max
  */
 
+/**
+ * Guarda un pedido en la base de datos con generación de folio y bloqueo de seguridad.
+ * @param {Array<Object>} articulos - Lista de artículos calculados para el pedido.
+ * @returns {string} El folio generado para el pedido.
+ */
+function savePedido(articulos) {
+  const lock = LockService.getScriptLock();
+  try {
+    // Intentar obtener el bloqueo por 10 segundos para evitar duplicidad de folios
+    if (lock.tryLock(10000)) {
+      const ss = SpreadsheetApp.openById(DB_ALMV_ID);
+      let sheet = ss.getSheetByName('Pedidos');
+      
+      // Crear la hoja si no existe
+      if (!sheet) {
+        sheet = ss.insertSheet('Pedidos');
+        const headers = ['Folio', 'Fecha', 'Usuario', 'Codigo', 'Descripcion', 'Cantidad_Solicitada', 'Unidades_Comerciales', 'Estatus'];
+        sheet.appendRow(headers);
+        sheet.getRange(1, 1, 1, headers.length).setFontWeight('bold').setBackground('#efefef');
+        sheet.setFrozenRows(1);
+      }
+
+      const lastRow = sheet.getLastRow();
+      const nextId = lastRow === 1 ? 1 : lastRow; // Si solo hay cabeceras, ID 1
+      const folio = 'PED-' + nextId.toString().padStart(3, '0');
+      const fecha = new Date();
+      const usuario = Session.getActiveUser().getEmail();
+
+      // Preparar matriz para setValues (Batch writing)
+      const values = articulos.map(art => [
+        folio,
+        fecha,
+        usuario,
+        art.codigo,
+        art.descripcion,
+        art.cantidadSolicitada,
+        art.unidadesComerciales,
+        'PENDIENTE'
+      ]);
+
+      // Escribir en bloque
+      sheet.getRange(lastRow + 1, 1, values.length, 8).setValues(values);
+
+      // Auditoría en Cloud Logging
+      console.log(JSON.stringify({
+        event: 'PEDIDO_GUARDADO_EXITO',
+        folio: folio,
+        usuario: usuario,
+        itemsCount: values.length,
+        timestamp: fecha.toISOString()
+      }));
+
+      return folio;
+    } else {
+      throw new Error("No se pudo obtener el bloqueo del script (timeout).");
+    }
+  } catch (err) {
+    console.error("Error en savePedido:", err);
+    throw new Error("Error crítico al guardar pedido: " + err.message);
+  } finally {
+    lock.releaseLock();
+  }
+}
