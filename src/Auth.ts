@@ -11,10 +11,12 @@ const AUTHORIZED_DOMAIN = "hcg.gob.mx";
 
 /**
  * Verifica la autorización del usuario contra la base de datos centralizada.
- * @param {string} email - El correo electrónico obtenido via Session.getActiveUser().getEmail().
- * @return {boolean} True si el usuario tiene acceso permitido.
+ * Implementa un patrón de 3 capas: Dominio → Caché → Spreadsheet.
+ *
+ * @param email - El correo electrónico obtenido via Session.getActiveUser().getEmail().
+ * @returns True si el usuario tiene acceso permitido.
  */
-function isUserAuthorized(email) {
+function isUserAuthorized(email: string): boolean {
   if (!email) return false;
   const targetEmail = email.toLowerCase().trim();
 
@@ -26,10 +28,10 @@ function isUserAuthorized(email) {
   // Capa 2 (Caché): Intenta obtener la lista desde CacheService.getScriptCache().
   const cache = CacheService.getScriptCache();
   const cachedData = cache.get(CACHE_KEY);
-  
+
   if (cachedData) {
     try {
-      const allowedEmails = JSON.parse(cachedData);
+      const allowedEmails: string[] = JSON.parse(cachedData);
       if (allowedEmails.includes(targetEmail)) {
         return true;
       }
@@ -38,22 +40,21 @@ function isUserAuthorized(email) {
     }
   }
 
-  // Capa 3 (Spreadsheet - Batching)
+  // Capa 3 (Spreadsheet - Batching) — Sin LockService (operación de solo lectura).
   try {
     const ss = SpreadsheetApp.openById(SS_ID);
     const sheet = ss.getSheetByName(SHEET_NAME);
-    
+
     if (!sheet) {
       throw new Error(`No se encontró la hoja con el nombre: ${SHEET_NAME}`);
     }
 
-    // Usa el patrón de lotes: const data = sheet.getDataRange().getValues();
-    const data = sheet.getDataRange().getValues();
-    
+    const data: unknown[][] = sheet.getDataRange().getValues();
+
     // Busca el índice de la columna 'email' (Columna 3, Índice 2)
     const emailIndex = 2;
-    const emails = data.slice(1)
-      .map(row => row[emailIndex] ? row[emailIndex].toString().toLowerCase().trim() : "")
+    const emails: string[] = data.slice(1)
+      .map(row => row[emailIndex] ? String(row[emailIndex]).toLowerCase().trim() : "")
       .filter(e => e !== "");
 
     // Guarda la lista en caché como string JSON por 1200 segundos (20 min).
@@ -66,7 +67,7 @@ function isUserAuthorized(email) {
       status: "ERROR_ACCESSING_DATABASE",
       ssId: SS_ID,
       timestamp: new Date().toISOString(),
-      details: err.toString()
+      details: String(err)
     }));
   }
 
@@ -75,15 +76,18 @@ function isUserAuthorized(email) {
 
 /**
  * Función puente para mantener compatibilidad con la interfaz actual.
+ *
+ * @returns True si el usuario de la sesión activa está autorizado.
  */
-function isAuthorized() {
+function isAuthorized(): boolean {
   return isUserAuthorized(Session.getActiveUser().getEmail());
 }
 
 /**
  * Gets the current user's email for the frontend.
- * @returns {string} The user's email address.
+ *
+ * @returns The user's email address.
  */
-function getUserEmail() {
+function getUserEmail(): string {
   return Session.getActiveUser().getEmail();
 }
