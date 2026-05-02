@@ -10,6 +10,7 @@
  * @returns {Array} Resultados procesados
  */
 function calculateOrderRequisition(solicitudes) {
+  if (!isAuthorized()) throw new Error("Unauthorized");
   // Factores de merma extraídos de la especificación clínica
   const FACTORES_MERMA = {
     'ABARROTES': 1.05,

@@ -13,6 +13,7 @@ const CATALOG_CACHE_KEY = 'adjudicados_catalog_json';
  * @returns {Array<Object>} Arreglo de objetos con los datos de los artículos.
  */
 function getAdjudicadosCatalog() {
+  if (!isAuthorized()) throw new Error("Unauthorized");
   const cachedData = getLargeCache(CATALOG_CACHE_KEY);
   
   if (cachedData) {
@@ -121,6 +122,7 @@ function getLargeCache(key) {
  * @returns {string} El folio generado para el pedido.
  */
 function savePedido(articulos) {
+  if (!isAuthorized()) throw new Error("Unauthorized");
   const lock = LockService.getScriptLock();
   try {
     // Intentar obtener el bloqueo por 10 segundos para evitar duplicidad de folios
