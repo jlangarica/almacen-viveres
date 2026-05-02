@@ -38,16 +38,40 @@ function include(filename) {
   return HtmlService.createHtmlOutputFromFile(filename).getContent();
 }
 
+/** Whitelist of valid module names for the SPA router. */
+const ALLOWED_MODULES: ReadonlySet<string> = new Set([
+  'Dashboard',
+  'Almacenes',
+  'Pedidos',
+  'OrdenesCompra',
+  'Entradas',
+  'Salidas',
+  'Contratos',
+  'Pacientes',
+  'Servicios',
+  'Proveedores',
+  'Recepciones'
+]);
+
 /**
  * Returns an HTML fragment for a specific module.
  * Used for SPA-like navigation via google.script.run.
- * 
- * @param {string} filename The name of the HTML file to load.
- * @returns {string} The HTML content.
+ * Validates the module name against an explicit whitelist to prevent path traversal.
+ *
+ * @param moduleName - The name of the module to load (must match whitelist).
+ * @returns The evaluated HTML content string.
  */
-function getModuleContent(filename) {
-  return HtmlService.createTemplateFromFile(`ui/modules/${filename}`)
+function getModuleContent(moduleName: string): string {
+  if (!isAuthorized()) throw new Error("Unauthorized");
+
+  // Sanitize: strip any path separators or extension attempts
+  const sanitized = moduleName.replace(/[\/\\\.]/g, '');
+
+  if (!ALLOWED_MODULES.has(sanitized)) {
+    throw new Error(`Módulo no permitido: ${sanitized}`);
+  }
+
+  return HtmlService.createTemplateFromFile(`ui/modules/${sanitized}`)
     .evaluate()
     .getContent();
 }
-
