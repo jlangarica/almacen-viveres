@@ -5,20 +5,13 @@
  */
 
 /**
- * Interface para representar una solicitud de pedido
- * @typedef {Object} SolicitudPedido
- * @property {string} codigo - Código del insumo solicitado
- * @property {number} cantidadSolicitada - Cantidad neta solicitada
- */
-
-/**
  * Calcula la requisición de orden
- * @param {SolicitudPedido[]} solicitudes - Array de solicitudes de pedidos
+ * @param {Array} solicitudes - Array de solicitudes de pedidos
  * @returns {Array} Resultados procesados
  */
-function calculateOrderRequisition(solicitudes: any[]) {
+function calculateOrderRequisition(solicitudes) {
   // Factores de merma extraídos de la especificación clínica
-  const FACTORES_MERMA: Record<string, number> = {
+  const FACTORES_MERMA = {
     'ABARROTES': 1.05,
     'CARNES': 1.10,
     'FRUTAS Y VERDURAS': 1.15,
@@ -30,10 +23,10 @@ function calculateOrderRequisition(solicitudes: any[]) {
   // Obtener el catálogo desde la función existente en Database.ts
   // @ts-ignore - Definida en otro archivo de GAS
   const catalog = getAdjudicadosCatalog(); 
-  const resultados: any[] = [];
+  const resultados = [];
 
   solicitudes.forEach(req => {
-    const insumo = catalog.find((i: any) => i.codigo === req.codigo);
+    const insumo = catalog.find(i => i.codigo === req.codigo);
     if (!insumo) {
       resultados.push({ codigo: req.codigo, error: 'INSUMO_NO_ENCONTRADO' });
       return;
