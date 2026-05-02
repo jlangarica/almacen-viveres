@@ -1,0 +1,166 @@
+<style>
+  #proveedores-module {
+    --primary: #7c3aed;
+    --primary-light: #f5f3ff;
+    --fg: #1e293b;
+    --fg-light: #64748b;
+    --border: #e2e8f0;
+    --bg-card: #ffffff;
+    --radius: 12px;
+  }
+
+  #proveedores-module .view-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+  }
+
+  #proveedores-module .header-title h2 {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--fg);
+  }
+
+  #proveedores-module .header-title p {
+    margin: 4px 0 0;
+    color: var(--fg-light);
+    font-size: 14px;
+  }
+
+  #proveedores-module .card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  }
+
+  #proveedores-module .table-container {
+    width: 100%;
+    overflow-x: auto;
+  }
+
+  #proveedores-module table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+  }
+
+  #proveedores-module th {
+    padding: 16px;
+    background: #f8fafc;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    color: var(--fg-light);
+    border-bottom: 1px solid var(--border);
+  }
+
+  #proveedores-module td {
+    padding: 16px;
+    border-bottom: 1px solid var(--border);
+    font-size: 14px;
+    color: var(--fg);
+  }
+
+  #proveedores-module tr:last-child td {
+    border-bottom: none;
+  }
+
+  #proveedores-module .btn {
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s;
+  }
+
+  #proveedores-module .btn-primary {
+    background: var(--primary);
+    color: white;
+  }
+
+  #proveedores-module .btn-primary:hover {
+    filter: brightness(1.1);
+  }
+
+  #proveedores-module .skeleton {
+    height: 20px;
+    background: #f1f5f9;
+    border-radius: 4px;
+    animation: pulse 1.5s infinite;
+  }
+
+  @keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.5; }
+    100% { opacity: 1; }
+  }
+</style>
+
+<div id="proveedores-module">
+  <div class="view-header">
+    <div class="header-title">
+      <h2>Proveedores</h2>
+      <p>Directorio de proveedores y contratistas</p>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-primary">+ Agregar Proveedor</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>RFC / ID</th>
+            <th>Razón Social</th>
+            <th>Contacto</th>
+            <th>Teléfono</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody id="proveedores-body">
+          <tr>
+            <td colspan="6"><div class="skeleton"></div></td>
+          </tr>
+          <tr>
+            <td colspan="6"><div class="skeleton"></div></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+  (function() {
+    console.log('Módulo Proveedores cargado');
+    setTimeout(() => {
+      const body = document.getElementById('proveedores-body');
+      body.innerHTML = `
+        <tr>
+          <td><b>DME123456TS1</b></td>
+          <td>Distribuidora Médica S.A. de C.V.</td>
+          <td>Lic. Martha Solís</td>
+          <td>33 1234 5678</td>
+          <td><span style="color:#059669; font-weight:600;">Activo</span></td>
+          <td><button class="btn" style="background:#f1f5f9; color:#475569;">Editar</button></td>
+        </tr>
+        <tr>
+          <td><b>AOC987654XYZ</b></td>
+          <td>Alimentos del Occidente</td>
+          <td>Ing. Roberto Ruiz</td>
+          <td>33 8765 4321</td>
+          <td><span style="color:#059669; font-weight:600;">Activo</span></td>
+          <td><button class="btn" style="background:#f1f5f9; color:#475569;">Editar</button></td>
+        </tr>
+      `;
+    }, 700);
+  })();
+</script>

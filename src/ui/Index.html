@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+    <?!= include('ui/Styles'); ?>
+  </head>
+  <body>
+    <div class="app-wrapper">
+      <!-- Sidebar Navigation -->
+      <aside class="sidebar">
+        <div class="sidebar-header" style="text-align: center; padding: 20px 10px;">
+          <img src="https://portal.hcg.gob.mx/hcg/sites/hcgtransparencia.dd/files/styles/boletines_galeria_eventos/public/imgEventosCS/Logotipo%20HCG_17.jpg?itok=Hix5xedr" 
+               alt="HCG Logo" 
+               class="sidebar-logo">
+          <div class="brand-title">OPD HOSPITAL CIVIL DE GUADALAJARA</div>
+          <div class="brand-subtitle">Almacén de Víveres</div>
+        </div>
+        
+        <nav class="nav-menu">
+          <div class="nav-item active" onclick="loadModule('Dashboard', this, 'Dashboard')">
+            <div class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg></div>
+            <span>Dashboard</span>
+          </div>
+          
+          <div class="nav-item" onclick="loadModule('Almacenes', this, 'Almacenes')">
+            <div class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg></div>
+            <span>Almacenes</span>
+          </div>
+
+          <div class="nav-item" onclick="loadModule('Pedidos', this, 'Pedidos')">
+            <div class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg></div>
+            <span>Pedidos</span>
+          </div>
+
+          <div class="nav-item" onclick="loadModule('Contratos', this, 'Contratos')">
+            <div class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><polyline points="17 11 19 13 23 9"></polyline></svg></div>
+            <span>Contratos</span>
+          </div>
+
+          <div class="nav-item" onclick="loadModule('Salidas', this, 'Salidas')">
+            <div class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 17l5-5-5-5"></path><path d="M13.8 12H3"></path></svg></div>
+            <span>Salidas</span>
+          </div>
+
+          <div class="nav-item" onclick="loadModule('Entradas', this, 'Entradas')">
+            <div class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 17l-5-5 5-5"></path><path d="M11.2 12H21"></path></svg></div>
+            <span>Entradas</span>
+          </div>
+
+          <div class="nav-item" onclick="loadModule('OrdenesCompra', this, 'Ordenes de Compra')">
+            <div class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg></div>
+            <span>Ordenes de Compra</span>
+          </div>
+
+          <div class="nav-item" onclick="loadModule('Recepciones', this, 'Recepciones')">
+            <div class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"></polyline><path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"></path></svg></div>
+            <span>Recepciones</span>
+          </div>
+
+          <div class="nav-item" onclick="loadModule('Proveedores', this, 'Proveedores')">
+            <div class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 3h15v13H1z"/><path d="M16 8h6l2 3v5h-8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg></div>
+            <span>Proveedores</span>
+          </div>
+
+          <div class="nav-item" onclick="loadModule('Pacientes', this, 'Pacientes')">
+            <div class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg></div>
+            <span>Pacientes</span>
+          </div>
+
+          <div class="nav-item" onclick="loadModule('Servicios', this, 'Servicios')">
+            <div class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg></div>
+            <span>Servicios</span>
+          </div>
+        </nav>
+      </aside>
+
+      <!-- Main Content Area -->
+      <main class="main-content">
+        <!-- Top Bar -->
+        <header class="top-bar">
+          <div class="page-title" id="current-page-title">Dashboard</div>
+          
+          <div class="user-profile">
+            <div class="user-info">
+              <div class="user-name">Usuario Conectado</div>
+              <div class="user-email-small"><?= getUserEmail(); ?></div>
+            </div>
+            <div class="avatar">
+              <?= getUserEmail().charAt(0).toUpperCase(); ?>
+            </div>
+          </div>
+        </header>
+
+        <!-- Dynamic Content Container -->
+        <div id="content-area">
+          <div class="view-container">
+            <!-- Dashboard Home (Default) -->
+            <div class="stats-grid">
+              <div class="stat-card" onclick="loadModule('Almacenes')">
+                <div class="stat-icon bg-blue"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path></svg></div>
+                <div class="stat-info"><h3>Almacenes</h3><p>Gestión de Stock</p></div>
+              </div>
+              <div class="stat-card" onclick="loadModule('Pedidos')">
+                <div class="stat-icon bg-green"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path></svg></div>
+                <div class="stat-info"><h3>Pedidos</h3><p>Pendientes por surtir</p></div>
+              </div>
+              <div class="stat-card" onclick="loadModule('Contratos')">
+                <div class="stat-icon bg-orange"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path></svg></div>
+                <div class="stat-info"><h3>Contratos</h3><p>Vigentes 2024</p></div>
+              </div>
+              <div class="stat-card" onclick="loadModule('Salidas')">
+                <div class="stat-icon bg-red"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 17l5-5-5-5"></path></svg></div>
+                <div class="stat-info"><h3>Salidas</h3><p>Registro Diario</p></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Global Loader -->
+        <div id="app-loader" class="loader">
+          <div class="spinner"></div>
+          <p>Cargando módulo...</p>
+        </div>
+      </main>
+    </div>
+
+    <?!= include('ui/Scripts'); ?>
+  </body>
+</html>

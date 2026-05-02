@@ -1,0 +1,96 @@
+/**
+ * @fileoverview Módulo de Seguridad y Autorización HCG.
+ * @author Antigravity
+ */
+
+// Variables Globales de Configuración
+const SS_ID = "1pvbHuJhIir5EvmTBk0bZrz2-1gotpLngqhrR1E1NYnQ";
+const SHEET_NAME = "Usuarios";
+const CACHE_KEY = "authorized_emails_list";
+const AUTHORIZED_DOMAIN = "hcg.gob.mx";
+
+/**
+ * Verifica la autorización del usuario contra la base de datos centralizada.
+ * @param {string} email - El correo electrónico obtenido via Session.getActiveUser().getEmail().
+ * @return {boolean} True si el usuario tiene acceso permitido.
+ */
+function isUserAuthorized(email) {
+  if (!email) return false;
+  const targetEmail = email.toLowerCase().trim();
+
+  // Capa 1 (Dominio): Si el email no termina en @hcg.gob.mx, retorna false inmediatamente.
+  if (!targetEmail.endsWith(`@${AUTHORIZED_DOMAIN}`)) {
+    return false;
+  }
+
+  // Capa 2 (Caché): Intenta obtener la lista desde CacheService.getScriptCache().
+  const cache = CacheService.getScriptCache();
+  const cachedData = cache.get(CACHE_KEY);
+  
+  if (cachedData) {
+    try {
+      const allowedEmails = JSON.parse(cachedData);
+      if (allowedEmails.includes(targetEmail)) {
+        return true;
+      }
+    } catch (e) {
+      console.warn("Error parseando caché, procediendo a recargar desde Spreadsheet.");
+    }
+  }
+
+  // Capa 3 (Spreadsheet - Batching)
+  const lock = LockService.getScriptLock();
+  try {
+    // Esperar hasta 30 segundos por el bloqueo para evitar colisiones
+    if (lock.tryLock(30000)) {
+      const ss = SpreadsheetApp.openById(SS_ID);
+      const sheet = ss.getSheetByName(SHEET_NAME);
+      
+      if (!sheet) {
+        throw new Error(`No se encontró la hoja con el nombre: ${SHEET_NAME}`);
+      }
+
+      // Usa el patrón de lotes: const data = sheet.getDataRange().getValues();
+      const data = sheet.getDataRange().getValues();
+      
+      // Busca el índice de la columna 'email' (Columna 3, Índice 2)
+      // Mapea la columna: const emails = data.slice(1).map(row => row[2].toString().toLowerCase());
+      const emailIndex = 2;
+      const emails = data.slice(1)
+        .map(row => row[emailIndex] ? row[emailIndex].toString().toLowerCase().trim() : "")
+        .filter(e => e !== "");
+
+      // Guarda la lista en caché como string JSON por 1200 segundos (20 min).
+      cache.put(CACHE_KEY, JSON.stringify(emails), 1200);
+
+      return emails.includes(targetEmail);
+    }
+  } catch (err) {
+    // Manejo de Errores y Logs: Si el SS_ID no es accesible, dispara console.error con un objeto JSON
+    console.error(JSON.stringify({
+      status: "ERROR_ACCESSING_DATABASE",
+      ssId: SS_ID,
+      timestamp: new Date().toISOString(),
+      details: err.toString()
+    }));
+  } finally {
+    lock.releaseLock();
+  }
+
+  return false;
+}
+
+/**
+ * Función puente para mantener compatibilidad con la interfaz actual.
+ */
+function isAuthorized() {
+  return isUserAuthorized(Session.getActiveUser().getEmail());
+}
+
+/**
+ * Gets the current user's email for the frontend.
+ * @returns {string} The user's email address.
+ */
+function getUserEmail() {
+  return Session.getActiveUser().getEmail();
+}

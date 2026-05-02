@@ -1,0 +1,21 @@
+# Clasp settings
+.clasp.json
+
+# Credentials and secrets
+creds.json
+secret.json
+
+# Dependencies
+node_modules/
+
+# OS specific files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+
+# Build artifacts (if any)
+dist/
+build/

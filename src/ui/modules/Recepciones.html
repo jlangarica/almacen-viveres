@@ -1,0 +1,158 @@
+<style>
+  #recepciones-module {
+    --primary: #059669;
+    --primary-light: #ecfdf5;
+    --fg: #1e293b;
+    --fg-light: #64748b;
+    --border: #e2e8f0;
+    --bg-card: #ffffff;
+    --radius: 12px;
+  }
+
+  #recepciones-module .view-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+  }
+
+  #recepciones-module .header-title h2 {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--fg);
+  }
+
+  #recepciones-module .header-title p {
+    margin: 4px 0 0;
+    color: var(--fg-light);
+    font-size: 14px;
+  }
+
+  #recepciones-module .card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  }
+
+  #recepciones-module .table-container {
+    width: 100%;
+    overflow-x: auto;
+  }
+
+  #recepciones-module table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+  }
+
+  #recepciones-module th {
+    padding: 16px;
+    background: #f8fafc;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    color: var(--fg-light);
+    border-bottom: 1px solid var(--border);
+  }
+
+  #recepciones-module td {
+    padding: 16px;
+    border-bottom: 1px solid var(--border);
+    font-size: 14px;
+    color: var(--fg);
+  }
+
+  #recepciones-module tr:last-child td {
+    border-bottom: none;
+  }
+
+  #recepciones-module .btn {
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s;
+  }
+
+  #recepciones-module .btn-primary {
+    background: var(--primary);
+    color: white;
+  }
+
+  #recepciones-module .btn-primary:hover {
+    filter: brightness(1.1);
+  }
+
+  #recepciones-module .skeleton {
+    height: 20px;
+    background: #f1f5f9;
+    border-radius: 4px;
+    animation: pulse 1.5s infinite;
+  }
+
+  @keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.5; }
+    100% { opacity: 1; }
+  }
+</style>
+
+<div id="recepciones-module">
+  <div class="view-header">
+    <div class="header-title">
+      <h2>Recepciones</h2>
+      <p>Entrada física de mercancía y validación</p>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-primary">Registrar Recepción</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>ID Recepción</th>
+            <th>OC Relacionada</th>
+            <th>Fecha Recepción</th>
+            <th>Entregado por</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody id="recepciones-body">
+          <tr>
+            <td colspan="6"><div class="skeleton"></div></td>
+          </tr>
+          <tr>
+            <td colspan="6"><div class="skeleton"></div></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+  (function() {
+    console.log('Módulo Recepciones cargado');
+    setTimeout(() => {
+      const body = document.getElementById('recepciones-body');
+      body.innerHTML = `
+        <tr>
+          <td><b>REC-8842</b></td>
+          <td>OC-2024-001</td>
+          <td>01/05/2024 10:30</td>
+          <td>Juan Pérez (Chofer)</td>
+          <td><span style="color:#059669; font-weight:600;">Verificado</span></td>
+          <td><button class="btn" style="background:#f1f5f9; color:#475569;">Detalles</button></td>
+        </tr>
+      `;
+    }, 800);
+  })();
+</script>

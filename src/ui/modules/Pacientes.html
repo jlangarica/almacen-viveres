@@ -1,0 +1,166 @@
+<style>
+  #pacientes-module {
+    --primary: #db2777;
+    --primary-light: #fdf2f8;
+    --fg: #1e293b;
+    --fg-light: #64748b;
+    --border: #e2e8f0;
+    --bg-card: #ffffff;
+    --radius: 12px;
+  }
+
+  #pacientes-module .view-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+  }
+
+  #pacientes-module .header-title h2 {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--fg);
+  }
+
+  #pacientes-module .header-title p {
+    margin: 4px 0 0;
+    color: var(--fg-light);
+    font-size: 14px;
+  }
+
+  #pacientes-module .card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  }
+
+  #pacientes-module .table-container {
+    width: 100%;
+    overflow-x: auto;
+  }
+
+  #pacientes-module table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+  }
+
+  #pacientes-module th {
+    padding: 16px;
+    background: #f8fafc;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    color: var(--fg-light);
+    border-bottom: 1px solid var(--border);
+  }
+
+  #pacientes-module td {
+    padding: 16px;
+    border-bottom: 1px solid var(--border);
+    font-size: 14px;
+    color: var(--fg);
+  }
+
+  #pacientes-module tr:last-child td {
+    border-bottom: none;
+  }
+
+  #pacientes-module .btn {
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s;
+  }
+
+  #pacientes-module .btn-primary {
+    background: var(--primary);
+    color: white;
+  }
+
+  #pacientes-module .btn-primary:hover {
+    filter: brightness(1.1);
+  }
+
+  #pacientes-module .skeleton {
+    height: 20px;
+    background: #f1f5f9;
+    border-radius: 4px;
+    animation: pulse 1.5s infinite;
+  }
+
+  @keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.5; }
+    100% { opacity: 1; }
+  }
+</style>
+
+<div id="pacientes-module">
+  <div class="view-header">
+    <div class="header-title">
+      <h2>Pacientes</h2>
+      <p>Registro y control de beneficiarios</p>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-primary">+ Nuevo Paciente</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Expediente</th>
+            <th>Nombre Completo</th>
+            <th>Edad</th>
+            <th>Género</th>
+            <th>Servicio</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody id="pacientes-body">
+          <tr>
+            <td colspan="6"><div class="skeleton"></div></td>
+          </tr>
+          <tr>
+            <td colspan="6"><div class="skeleton"></div></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+  (function() {
+    console.log('Módulo Pacientes cargado');
+    setTimeout(() => {
+      const body = document.getElementById('pacientes-body');
+      body.innerHTML = `
+        <tr>
+          <td><b>EXP-2024-991</b></td>
+          <td>García López, Alejandro</td>
+          <td>45 años</td>
+          <td>Masculino</td>
+          <td>Cardiología</td>
+          <td><button class="btn" style="background:#f1f5f9; color:#475569;">Ficha</button></td>
+        </tr>
+        <tr>
+          <td><b>EXP-2024-992</b></td>
+          <td>Rodríguez Pérez, María</td>
+          <td>32 años</td>
+          <td>Femenino</td>
+          <td>Pediatría</td>
+          <td><button class="btn" style="background:#f1f5f9; color:#475569;">Ficha</button></td>
+        </tr>
+      `;
+    }, 600);
+  })();
+</script>

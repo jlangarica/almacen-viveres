@@ -1,0 +1,62 @@
+<script>
+  /**
+   * @fileoverview Client-side controller for SPA navigation.
+   */
+
+  /**
+   * Loads a module dynamically into the content area.
+   * @param {string} moduleName The name of the module to load.
+   * @param {HTMLElement} element The clicked navigation element.
+   */
+  function loadModule(moduleName, element, label) {
+    // Update active state in sidebar
+    if (element) {
+      document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+      element.classList.add('active');
+    }
+
+    // Update Top Bar Title
+    document.getElementById('current-page-title').innerText = label || moduleName;
+
+    // Show Loader
+    const loader = document.getElementById('app-loader');
+    loader.style.display = 'flex';
+
+    // Request module content from server
+    google.script.run
+      .withSuccessHandler((html) => {
+        const contentArea = document.getElementById('content-area');
+        contentArea.innerHTML = html;
+        
+        // Ejecutar scripts incrustados en el HTML inyectado
+        const scripts = contentArea.querySelectorAll('script');
+        scripts.forEach(oldScript => {
+          const newScript = document.createElement('script');
+          Array.from(oldScript.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value));
+          newScript.appendChild(document.createTextNode(oldScript.innerHTML));
+          oldScript.parentNode.replaceChild(newScript, oldScript);
+        });
+
+        loader.style.display = 'none';
+      })
+      .withFailureHandler((err) => {
+        console.error('Error loading module:', err);
+        document.getElementById('content-area').innerHTML = `
+          <div class="view-container">
+            <div class="alert alert-error">
+              Error al cargar el módulo ${moduleName}. Verifica que el archivo existe.
+            </div>
+          </div>
+        `;
+        loader.style.display = 'none';
+      })
+      .getModuleContent(moduleName);
+  }
+
+  /**
+   * Initialization
+   */
+  document.addEventListener('DOMContentLoaded', () => {
+    console.log('Almacén App Initialized');
+  });
+</script>

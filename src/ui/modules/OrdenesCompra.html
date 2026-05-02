@@ -1,0 +1,180 @@
+<style>
+  #ordenes-compra-module {
+    --primary: #2563eb;
+    --primary-light: #eff6ff;
+    --fg: #1e293b;
+    --fg-light: #64748b;
+    --border: #e2e8f0;
+    --bg-card: #ffffff;
+    --radius: 12px;
+  }
+
+  #ordenes-compra-module .view-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+  }
+
+  #ordenes-compra-module .header-title h2 {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--fg);
+  }
+
+  #ordenes-compra-module .header-title p {
+    margin: 4px 0 0;
+    color: var(--fg-light);
+    font-size: 14px;
+  }
+
+  #ordenes-compra-module .card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  }
+
+  #ordenes-compra-module .table-container {
+    width: 100%;
+    overflow-x: auto;
+  }
+
+  #ordenes-compra-module table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+  }
+
+  #ordenes-compra-module th {
+    padding: 16px;
+    background: #f8fafc;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    color: var(--fg-light);
+    border-bottom: 1px solid var(--border);
+  }
+
+  #ordenes-compra-module td {
+    padding: 16px;
+    border-bottom: 1px solid var(--border);
+    font-size: 14px;
+    color: var(--fg);
+  }
+
+  #ordenes-compra-module tr:last-child td {
+    border-bottom: none;
+  }
+
+  #ordenes-compra-module .status-badge {
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  #ordenes-compra-module .status-pending { background: #fef3c7; color: #92400e; }
+  #ordenes-compra-module .status-completed { background: #dcfce7; color: #166534; }
+
+  #ordenes-compra-module .btn {
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s;
+  }
+
+  #ordenes-compra-module .btn-primary {
+    background: var(--primary);
+    color: white;
+  }
+
+  #ordenes-compra-module .btn-primary:hover {
+    filter: brightness(1.1);
+  }
+
+  #ordenes-compra-module .skeleton {
+    height: 20px;
+    background: #f1f5f9;
+    border-radius: 4px;
+    animation: pulse 1.5s infinite;
+  }
+
+  @keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.5; }
+    100% { opacity: 1; }
+  }
+</style>
+
+<div id="ordenes-compra-module">
+  <div class="view-header">
+    <div class="header-title">
+      <h2>Ordenes de Compra</h2>
+      <p>Gestión de órdenes y adquisiciones</p>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-primary">Nueva Orden</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Folio</th>
+            <th>Fecha</th>
+            <th>Proveedor</th>
+            <th>Total</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody id="ordenes-body">
+          <tr>
+            <td colspan="6"><div class="skeleton"></div></td>
+          </tr>
+          <tr>
+            <td colspan="6"><div class="skeleton"></div></td>
+          </tr>
+          <tr>
+            <td colspan="6"><div class="skeleton"></div></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+  (function() {
+    console.log('Módulo Ordenes de Compra cargado');
+    // Simular carga de datos
+    setTimeout(() => {
+      const body = document.getElementById('ordenes-body');
+      body.innerHTML = `
+        <tr>
+          <td><b>OC-2024-001</b></td>
+          <td>01/05/2024</td>
+          <td>Distribuidora Médica S.A.</td>
+          <td>$45,200.00</td>
+          <td><span class="status-badge status-pending">Pendiente</span></td>
+          <td><button class="btn" style="background:#f1f5f9; color:#475569;">Ver</button></td>
+        </tr>
+        <tr>
+          <td><b>OC-2024-002</b></td>
+          <td>30/04/2024</td>
+          <td>Alimentos del Occidente</td>
+          <td>$12,800.00</td>
+          <td><span class="status-badge status-completed">Completada</span></td>
+          <td><button class="btn" style="background:#f1f5f9; color:#475569;">Ver</button></td>
+        </tr>
+      `;
+    }, 1000);
+  })();
+</script>

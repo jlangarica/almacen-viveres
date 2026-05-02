@@ -1,0 +1,166 @@
+<style>
+  #servicios-module {
+    --primary: #ea580c;
+    --primary-light: #fff7ed;
+    --fg: #1e293b;
+    --fg-light: #64748b;
+    --border: #e2e8f0;
+    --bg-card: #ffffff;
+    --radius: 12px;
+  }
+
+  #servicios-module .view-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+  }
+
+  #servicios-module .header-title h2 {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--fg);
+  }
+
+  #servicios-module .header-title p {
+    margin: 4px 0 0;
+    color: var(--fg-light);
+    font-size: 14px;
+  }
+
+  #servicios-module .card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  }
+
+  #servicios-module .table-container {
+    width: 100%;
+    overflow-x: auto;
+  }
+
+  #servicios-module table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+  }
+
+  #servicios-module th {
+    padding: 16px;
+    background: #f8fafc;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    color: var(--fg-light);
+    border-bottom: 1px solid var(--border);
+  }
+
+  #servicios-module td {
+    padding: 16px;
+    border-bottom: 1px solid var(--border);
+    font-size: 14px;
+    color: var(--fg);
+  }
+
+  #servicios-module tr:last-child td {
+    border-bottom: none;
+  }
+
+  #servicios-module .btn {
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s;
+  }
+
+  #servicios-module .btn-primary {
+    background: var(--primary);
+    color: white;
+  }
+
+  #servicios-module .btn-primary:hover {
+    filter: brightness(1.1);
+  }
+
+  #servicios-module .skeleton {
+    height: 20px;
+    background: #f1f5f9;
+    border-radius: 4px;
+    animation: pulse 1.5s infinite;
+  }
+
+  @keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.5; }
+    100% { opacity: 1; }
+  }
+</style>
+
+<div id="servicios-module">
+  <div class="view-header">
+    <div class="header-title">
+      <h2>Servicios</h2>
+      <p>Unidades médicas y departamentos</p>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-primary">+ Nuevo Servicio</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Código</th>
+            <th>Nombre del Servicio</th>
+            <th>Ubicación</th>
+            <th>Responsable</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody id="servicios-body">
+          <tr>
+            <td colspan="6"><div class="skeleton"></div></td>
+          </tr>
+          <tr>
+            <td colspan="6"><div class="skeleton"></div></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+  (function() {
+    console.log('Módulo Servicios cargado');
+    setTimeout(() => {
+      const body = document.getElementById('servicios-body');
+      body.innerHTML = `
+        <tr>
+          <td><b>SRV-001</b></td>
+          <td>Cardiología Adultos</td>
+          <td>Edificio A - Piso 2</td>
+          <td>Dr. Roberto Méndez</td>
+          <td><span style="color:#059669; font-weight:600;">Operativo</span></td>
+          <td><button class="btn" style="background:#f1f5f9; color:#475569;">Gestionar</button></td>
+        </tr>
+        <tr>
+          <td><b>SRV-002</b></td>
+          <td>Urgencias Médicas</td>
+          <td>Planta Baja</td>
+          <td>Dra. Elena Sotelo</td>
+          <td><span style="color:#059669; font-weight:600;">Operativo</span></td>
+          <td><button class="btn" style="background:#f1f5f9; color:#475569;">Gestionar</button></td>
+        </tr>
+      `;
+    }, 500);
+  })();
+</script>
