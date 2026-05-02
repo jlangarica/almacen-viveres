@@ -382,13 +382,13 @@
     function renderSkeleton() {
       let html = '';
       for (let i = 0; i < 6; i++) {
-        html += \`<tr class="skeleton-row" style="animation-delay:\${i * 70}ms">
+        html += `<tr class="skeleton-row" style="animation-delay:${i * 70}ms">
           <td style="padding:16px 18px"><div class="skeleton-cell" style="width:80px"></div></td>
           <td style="padding:16px 18px"><div class="skeleton-cell" style="width:140px"></div></td>
           <td style="padding:16px 18px"><div class="skeleton-cell" style="width:200px"></div></td>
           <td style="padding:16px 18px"><div class="skeleton-cell" style="width:180px"></div></td>
           <td style="padding:16px 18px"><div class="skeleton-cell" style="width:70px;margin:0 auto"></div></td>
-        </tr>\`;
+        </tr>`;
       }
       $body.innerHTML = html;
     }
@@ -397,11 +397,11 @@
        ERROR
        ═══════════════════════════════════════════ */
     function handleError(err) {
-      $body.innerHTML = \`<tr><td colspan="5"><div class="state-container">
+      $body.innerHTML = `<tr><td colspan="5"><div class="state-container">
         <div class="state-icon error"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>
         <div class="state-title">Error al cargar datos</div>
-        <div class="state-desc">\${escapeHTML(err.message)}</div>
-      </div></td></tr>\`;
+        <div class="state-desc">${escapeHTML(err.message)}</div>
+      </div></td></tr>`;
     }
 
     /* ═══════════════════════════════════════════
@@ -409,11 +409,11 @@
        ═══════════════════════════════════════════ */
     function renderCatalog(data) {
       if (!data || !data.length) {
-        $body.innerHTML = \`<tr><td colspan="5"><div class="state-container">
+        $body.innerHTML = `<tr><td colspan="5"><div class="state-container">
           <div class="state-icon empty"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
           <div class="state-title">Sin contratos</div>
           <div class="state-desc">No se encontraron contratos registrados en el sistema.</div>
-        </div></td></tr>\`;
+        </div></td></tr>`;
         return;
       }
 
@@ -431,11 +431,11 @@
       const vencidos = data.filter(c => c.estatus === 'VENCIDO').length;
       const ampiados = data.filter(c => c.tiene_ampliacion).length;
 
-      $stats.innerHTML = \`
-        <div class="stat-chip"><span class="stat-dot" style="background:var(--primary)"></span>Vigentes <span class="stat-value">\${vigentes}</span></div>
-        <div class="stat-chip"><span class="stat-dot" style="background:var(--danger)"></span>Vencidos <span class="stat-value">\${vencidos}</span></div>
-        \${ampiados > 0 ? \`<div class="stat-chip"><span class="stat-dot" style="background:var(--indigo)"></span>Ampliados <span class="stat-value">\${ampiados}</span></div>\` : ''}
-      \`;
+      $stats.innerHTML = `
+        <div class="stat-chip"><span class="stat-dot" style="background:var(--primary)"></span>Vigentes <span class="stat-value">${vigentes}</span></div>
+        <div class="stat-chip"><span class="stat-dot" style="background:var(--danger)"></span>Vencidos <span class="stat-value">${vencidos}</span></div>
+        ${ampiados > 0 ? `<div class="stat-chip"><span class="stat-dot" style="background:var(--indigo)"></span>Ampliados <span class="stat-value">${ampiados}</span></div>` : ''}
+      `;
     }
 
     /* ═══════════════════════════════════════════
@@ -443,11 +443,11 @@
        ═══════════════════════════════════════════ */
     function renderRows(rows) {
       if (!rows.length) {
-        $body.innerHTML = \`<tr><td colspan="5"><div class="state-container">
+        $body.innerHTML = `<tr><td colspan="5"><div class="state-container">
           <div class="state-icon empty"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>
           <div class="state-title">Sin resultados</div>
           <div class="state-desc">Intenta con otros términos de búsqueda o cambia el filtro de estatus.</div>
-        </div></td></tr>\`;
+        </div></td></tr>`;
         return;
       }
 
@@ -455,30 +455,30 @@
         const delay = Math.min(idx * 35, 500);
         const isVigente = c.estatus === 'VIGENTE';
         const badgeClass = isVigente ? 'badge-vigente' : 'badge-vencido';
-        const ampHtml = c.tiene_ampliacion ? \`<span class="amp-chip">+ Amp</span>\` : '';
+        const ampHtml = c.tiene_ampliacion ? `<span class="amp-chip">+ Amp</span>` : '';
         
         // Cálculo de progreso de vigencia
         const progress = calcVigenciaProgress(c.fecha_inicio, c.fecha_fin, isVigente);
         const barClass = !isVigente ? 'vencido' : (progress > 80 ? 'proximo' : 'vigente');
 
-        return \`<tr style="animation-delay:\${delay}ms">
-          <td><span class="cell-code">\${escapeHTML(c.licitacion)}</span></td>
-          <td><span class="cell-provider">\${escapeHTML(c.proveedor)}</span></td>
-          <td><span class="cell-desc" title="\${escapeHTML(c.denominacion)}">\${escapeHTML(c.denominacion)}</span></td>
+        return `<tr style="animation-delay:${delay}ms">
+          <td><span class="cell-code">${escapeHTML(c.licitacion)}</span></td>
+          <td><span class="cell-provider">${escapeHTML(c.proveedor)}</span></td>
+          <td><span class="cell-desc" title="${escapeHTML(c.denominacion)}">${escapeHTML(c.denominacion)}</span></td>
           <td>
             <div class="vigencia-cell">
               <div class="vigencia-dates">
-                \${escapeHTML(c.fecha_inicio)} 
+                ${escapeHTML(c.fecha_inicio)} 
                 <svg class="vigencia-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-                \${escapeHTML(c.fecha_fin)} \${ampHtml}
+                ${escapeHTML(c.fecha_fin)} ${ampHtml}
               </div>
               <div class="vigencia-track">
-                <div class="vigencia-bar \${barClass}" style="width:\${progress}%"></div>
+                <div class="vigencia-bar ${barClass}" style="width:${progress}%"></div>
               </div>
             </div>
           </td>
-          <td><span class="badge \${badgeClass}"><span class="badge-dot"></span>\${escapeHTML(c.estatus)}</span></td>
-        </tr>\`;
+          <td><span class="badge ${badgeClass}"><span class="badge-dot"></span>${escapeHTML(c.estatus)}</span></td>
+        </tr>`;
       }).join('');
     }
 
