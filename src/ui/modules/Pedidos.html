@@ -313,6 +313,10 @@
       if (sol.procesado && sol.alertaExceso) {
         tr.classList.add('alerta-exceso');
         tr.title = `¡Alerta! Supera el límite máximo de ${sol.limiteMaximo || 'N/A'}`;
+      } else if (sol.error === 'STOCK_INSUFICIENTE') {
+        tr.style.backgroundColor = '#fce8e6';
+        tr.style.color = 'var(--danger, #d93025)';
+        tr.title = sol.mensaje || sol.error;
       } else if (sol.error) {
         tr.style.backgroundColor = '#f1f3f4';
         tr.style.color = '#5f6368';
@@ -321,7 +325,10 @@
       
       tr.innerHTML = `
         <td>${sol.codigo}</td>
-        <td>${sol.descripcion}</td>
+        <td>
+          ${sol.descripcion}
+          ${sol.error === 'STOCK_INSUFICIENTE' ? `<br><small style="color: var(--danger, #d93025); font-weight: 500;">${sol.mensaje}</small>` : ''}
+        </td>
         <td style="text-align: right;">${sol.procesado ? (sol.limiteMaximo !== undefined ? sol.limiteMaximo : '-') : '-'}</td>
         <td style="text-align: right;">${sol.cantidadSolicitada}</td>
         <td style="text-align: right; font-weight: bold;">
@@ -378,11 +385,10 @@
         });
         
         renderTable();
-        // Mostrar botón de confirmación si no hay errores críticos
+        // Mostrar botón de confirmación, deshabilitado si hay errores
+        btnConfirmar.style.display = 'inline-block';
         const hasErrors = solicitudes.some(s => s.error);
-        if (!hasErrors) {
-          btnConfirmar.style.display = 'inline-block';
-        }
+        btnConfirmar.disabled = hasErrors;
       })
       .withFailureHandler(function(err) {
         isProcessing = false;
@@ -396,6 +402,11 @@
   function handleConfirmar() {
     if (!isCalculated || isProcessing) return;
     
+    if (solicitudes.some(s => s.error)) {
+      alert('Existen artículos con error de stock. Por favor elimínelos o ajuste la cantidad antes de enviar.');
+      return;
+    }
+    
     if (!confirm('¿Estás seguro de enviar este pedido? Esta acción registrará el folio en la base de datos.')) {
       return;
     }
@@ -405,9 +416,9 @@
     btnConfirmar.innerHTML = 'Guardando...';
     
     google.script.run
-      .withSuccessHandler(function(folio) {
+      .withSuccessHandler(function(response) {
         isProcessing = false;
-        alert('¡Pedido Guardado Exitosamente!\nFolio generado: ' + folio);
+        alert('¡Pedido Guardado Exitosamente!\nFolio generado: ' + response.folio);
         resetForm();
       })
       .withFailureHandler(function(err) {
@@ -416,7 +427,7 @@
         btnConfirmar.innerHTML = 'Confirmar y Enviar Pedido';
         alert('Error al guardar pedido: ' + err.message);
       })
-      .savePedido(solicitudes);
+      .savePedidoAndUpdateStock({ lineas: solicitudes });
   }
 
   function resetForm() {
