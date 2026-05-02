@@ -129,17 +129,17 @@
 
     tbody.innerHTML = data.map(c => {
       const badgeClass = c.estatus === 'VIGENTE' ? 'badge-vigente' : 'badge-vencido';
-      const ampliacionHtml = c.tiene_ampliacion ? \`<span class="ampliacion-indicator" title="Tiene ampliación">+AMP</span>\` : '';
+      const ampliacionHtml = c.tiene_ampliacion ? `<span class="ampliacion-indicator" title="Tiene ampliación">+AMP</span>` : '';
       
-      return \`
+      return `
         <tr>
-          <td><strong>\${c.licitacion}</strong></td>
-          <td>\${c.proveedor}</td>
-          <td>\${c.denominacion}</td>
-          <td>\${c.fecha_inicio} a \${c.fecha_fin} \${ampliacionHtml}</td>
-          <td><span class="badge \${badgeClass}">\${c.estatus}</span></td>
+          <td><strong>${c.licitacion}</strong></td>
+          <td>${c.proveedor}</td>
+          <td>${c.denominacion}</td>
+          <td>${c.fecha_inicio} a ${c.fecha_fin} ${ampliacionHtml}</td>
+          <td><span class="badge ${badgeClass}">${c.estatus}</span></td>
         </tr>
-      \`;
+      `;
     }).join('');
   }
 
