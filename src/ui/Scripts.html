@@ -52,24 +52,37 @@
       .withSuccessHandler(function(html) {
         var contentArea = document.getElementById('content-area');
 
-        // ── Safe DOM Injection ───────────────────────────────────────────
-        // 1. Parse the server HTML into a disposable document fragment.
-        //    DOMParser creates an inert document — no scripts execute.
-        var parser = new DOMParser();
-        var doc = parser.parseFromString(html, 'text/html');
+        // ── Native & Safe DOM Injection ──────────────────────────────────
+        // 1. Clear previous content
+        contentArea.innerHTML = '';
 
-        // 2. Clear previous content safely
-        contentArea.textContent = '';
-
-        // 3. Move all child nodes from parsed body into the live DOM.
-        //    Script nodes from DOMParser are inert and will NOT execute,
-        //    which is the desired behavior — module logic is registered
-        //    via registerModuleInit() from server-side evaluated templates.
-        while (doc.body.firstChild) {
-          contentArea.appendChild(doc.body.adoptNode(doc.body.firstChild));
+        // 2. Use a Document Range to create a contextual fragment.
+        //    This is the modern, native way to parse HTML strings and
+        //    automatically execute their embedded <script> tags safely,
+        //    avoiding the fragilities of manual script extraction or eval().
+        try {
+          var range = document.createRange();
+          range.selectNode(contentArea);
+          var fragment = range.createContextualFragment(html);
+          contentArea.appendChild(fragment);
+        } catch (e) {
+          console.warn('createContextualFragment fallback for legacy GAS proxy:', e);
+          // Fallback for older GAS Caja proxies if Range API is restricted
+          contentArea.innerHTML = html;
+          var scripts = contentArea.querySelectorAll('script');
+          for (var i = 0; i < scripts.length; i++) {
+            var oldScript = scripts[i];
+            var newScript = document.createElement('script');
+            for (var j = 0; j < oldScript.attributes.length; j++) {
+              newScript.setAttribute(oldScript.attributes[j].name, oldScript.attributes[j].value);
+            }
+            newScript.textContent = oldScript.textContent;
+            oldScript.parentNode.replaceChild(newScript, oldScript);
+          }
         }
 
-        // 4. Execute the registered init function for this module, if any.
+        // 3. Execute the registered init function for this module, if any.
+        //    (For modules using the registerModuleInit pattern)
         if (MODULE_INIT_REGISTRY[moduleName]) {
           try {
             MODULE_INIT_REGISTRY[moduleName]();
