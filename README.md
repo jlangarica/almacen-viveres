@@ -1036,23 +1036,23 @@ gantt
 ### Flujo de Trabajo
 
 ```mermaid
-gitgraph
+gitGraph:
     commit id: "init: proyecto base"
-    branch feature/ordenes-compra
-    checkout feature/ordenes-compra
+    branch "feature/ordenes-compra"
+    checkout "feature/ordenes-compra"
     commit id: "feat: scaffold OC"
     commit id: "feat: tabla + filtros"
     commit id: "feat: integración backend"
     commit id: "test: validación manual"
     checkout main
-    merge feature/ordenes-compra id: "merge: OC module"
+    merge "feature/ordenes-compra" id: "merge: OC module"
     commit id: "release: v1.1.0"
-    branch feature/recepciones
-    checkout feature/recepciones
+    branch "feature/recepciones"
+    checkout "feature/recepciones"
     commit id: "feat: scaffold recepciones"
     commit id: "feat: verificación OC"
     checkout main
-    merge feature/recepciones id: "merge: recepciones"
+    merge "feature/recepciones" id: "merge: recepciones"
     commit id: "release: v1.2.0"
 ```
 
