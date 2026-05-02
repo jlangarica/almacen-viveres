@@ -1,54 +1,100 @@
 <script>
   /**
    * @fileoverview Client-side controller for SPA navigation.
+   * Uses a safe rendering pattern that avoids innerHTML + script re-execution (DOM-based XSS).
    */
+
+  /** Registry of module-level initialization functions keyed by module name. */
+  const MODULE_INIT_REGISTRY = {};
+
+  /**
+   * Registers a module's initialization callback.
+   * Called from within each module's own <script> block (included server-side via templating).
+   *
+   * @param {string} moduleName - Unique identifier for the module.
+   * @param {Function} initFn - Initialization function to execute after DOM injection.
+   */
+  function registerModuleInit(moduleName, initFn) {
+    MODULE_INIT_REGISTRY[moduleName] = initFn;
+  }
 
   /**
    * Loads a module dynamically into the content area.
-   * @param {string} moduleName The name of the module to load.
-   * @param {HTMLElement} element The clicked navigation element.
+   * The server returns pre-evaluated HTML (via HtmlService.evaluate()).
+   * Scripts embedded in modules are executed server-side during templating;
+   * client-side re-execution is handled through the registerModuleInit pattern.
+   *
+   * @param {string} moduleName - The name of the module to load.
+   * @param {HTMLElement} element - The clicked navigation element.
+   * @param {string} [label] - Display label for the top bar.
    */
   function loadModule(moduleName, element, label) {
     // Update active state in sidebar
     if (element) {
-      document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+      document.querySelectorAll('.nav-item').forEach(function(item) {
+        item.classList.remove('active');
+      });
       element.classList.add('active');
     }
 
     // Update Top Bar Title
-    document.getElementById('current-page-title').innerText = label || moduleName;
+    var titleEl = document.getElementById('current-page-title');
+    if (titleEl) {
+      titleEl.textContent = label || moduleName;
+    }
 
     // Show Loader
-    const loader = document.getElementById('app-loader');
-    loader.style.display = 'flex';
+    var loader = document.getElementById('app-loader');
+    if (loader) loader.style.display = 'flex';
 
     // Request module content from server
     google.script.run
-      .withSuccessHandler((html) => {
-        const contentArea = document.getElementById('content-area');
-        contentArea.innerHTML = html;
-        
-        // Ejecutar scripts incrustados en el HTML inyectado
-        const scripts = contentArea.querySelectorAll('script');
-        scripts.forEach(oldScript => {
-          const newScript = document.createElement('script');
-          Array.from(oldScript.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value));
-          newScript.appendChild(document.createTextNode(oldScript.innerHTML));
-          oldScript.parentNode.replaceChild(newScript, oldScript);
-        });
+      .withSuccessHandler(function(html) {
+        var contentArea = document.getElementById('content-area');
 
-        loader.style.display = 'none';
+        // ── Safe DOM Injection ───────────────────────────────────────────
+        // 1. Parse the server HTML into a disposable document fragment.
+        //    DOMParser creates an inert document — no scripts execute.
+        var parser = new DOMParser();
+        var doc = parser.parseFromString(html, 'text/html');
+
+        // 2. Clear previous content safely
+        contentArea.textContent = '';
+
+        // 3. Move all child nodes from parsed body into the live DOM.
+        //    Script nodes from DOMParser are inert and will NOT execute,
+        //    which is the desired behavior — module logic is registered
+        //    via registerModuleInit() from server-side evaluated templates.
+        while (doc.body.firstChild) {
+          contentArea.appendChild(doc.body.adoptNode(doc.body.firstChild));
+        }
+
+        // 4. Execute the registered init function for this module, if any.
+        if (MODULE_INIT_REGISTRY[moduleName]) {
+          try {
+            MODULE_INIT_REGISTRY[moduleName]();
+          } catch (initErr) {
+            console.error('Error in module init for ' + moduleName + ':', initErr);
+          }
+        }
+
+        if (loader) loader.style.display = 'none';
       })
-      .withFailureHandler((err) => {
+      .withFailureHandler(function(err) {
         console.error('Error loading module:', err);
-        document.getElementById('content-area').innerHTML = `
-          <div class="view-container">
-            <div class="alert alert-error">
-              Error al cargar el módulo ${moduleName}. Verifica que el archivo existe.
-            </div>
-          </div>
-        `;
-        loader.style.display = 'none';
+        var contentArea = document.getElementById('content-area');
+
+        // Safe error rendering — no user-controlled content in template
+        contentArea.textContent = '';
+        var container = document.createElement('div');
+        container.className = 'view-container';
+        var alert = document.createElement('div');
+        alert.className = 'alert alert-error';
+        alert.textContent = 'Error al cargar el módulo ' + moduleName + '. Verifica que el archivo existe.';
+        container.appendChild(alert);
+        contentArea.appendChild(container);
+
+        if (loader) loader.style.display = 'none';
       })
       .getModuleContent(moduleName);
   }
@@ -56,7 +102,7 @@
   /**
    * Initialization
    */
-  document.addEventListener('DOMContentLoaded', () => {
+  document.addEventListener('DOMContentLoaded', function() {
     console.log('Almacén App Initialized');
   });
 </script>
